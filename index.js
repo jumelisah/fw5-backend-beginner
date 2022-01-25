@@ -46,7 +46,6 @@ app.get('/list', (req,res)=>{
 })
 
 app.post('/add', (req,res)=>{
-    const id = dataVehicle.length
     connection.query(
         'INSERT INTO vehicle (name, release_year, type, seat, fuel_capacity, engine_capacity, class) VALUES (?,?,?,?,?,?,?)',
         [req.body.name, req.body.release_year, req.body.type, req.body.seat, req.body.fuel_capacity, req.body.engine_capacity, req.body.class], (error, results)=>{
@@ -62,12 +61,15 @@ app.post('/add', (req,res)=>{
 })
 
 app.delete('/delete/:id', (req, res)=>{
+    const {id} = req.params
+    const idx = dataVehicle.findIndex( val => val.id === parseInt(id))
     connection.query(
         'DELETE FROM vehicle WHERE id = ?', [req.params.id],
         (error,results)=>{
             console.log("success delete")
         }
     )
+    delete dataVehicle[idx]
     return res.json({
         success: true,
         message: "Delete Vehicle"
@@ -75,5 +77,5 @@ app.delete('/delete/:id', (req, res)=>{
 })
 
 app.listen(8000, ()=>{
-    console.log("App running on Port 3000")
+    console.log("App running on Port 8000")
 })
