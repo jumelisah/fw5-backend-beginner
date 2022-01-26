@@ -1,7 +1,8 @@
 const vehicles = require('express').Router()
 
-const {getVehicles} = require('../controller/vehicles')
+const {getVehicles, getVehicle} = require('../controller/vehicles')
 
 vehicles.get('/', getVehicles)
+vehicles.get('/:id', getVehicle)
 
 module.exports = vehicles
