@@ -1,4 +1,3 @@
-const { deleteVehicle } = require('../controller/delete');
 const db = require('../helpers/db')
 
 exports.deleteVehicle = (id, cb)=>{

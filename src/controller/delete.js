@@ -1,12 +1,15 @@
 const remove = require('../models/delete')
+const vehicleModel = require('../models/vehicles')
 
 const deleteVehicle = (req, res)=>{
     const {id} = req.params
-    remove.deleteVehicle(id, results=>{
+    vehicleModel.getVehicle(id, results=>{
         if(results.length>0){
-            return res.send({
-                success: true,
-                message: 'Deleted'
+            remove.deleteVehicle(id, result=>{
+                return res.send({
+                    success: true,
+                    message: 'Deleted'
+                })
             })
         }else{
             return res.status(404).send({
