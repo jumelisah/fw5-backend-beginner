@@ -55,7 +55,7 @@ app.post('/add', (req,res)=>{
     )
     return res.json({
         success: true,
-        message: "Register success",
+        message: "Add vehicle: success",
         data: dataVehicle[id]
     })
 })
@@ -72,7 +72,7 @@ app.delete('/delete/:id', (req, res)=>{
     delete dataVehicle[idx]
     return res.json({
         success: true,
-        message: "Delete Vehicle"
+        message: "Deleted"
     })
 })
 
