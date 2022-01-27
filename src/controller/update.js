@@ -3,7 +3,7 @@ const vehicleModel = require('../models/vehicles')
 
 const updateVehicle = (req, res)=>{
     const {id} = req.params
-    const data = [req.body.cost, req.body.isAvailable, id]
+    const data = [req.body.name, req.body.year, req.body.cost, req.body.isAvailable, req.body.seat, req.body.type, req.body.class, id]
     vehicleModel.getVehicle(id, results=>{
         if(results.length>0){
             update.updateVehicle(data, result=>{
