@@ -21,7 +21,7 @@ const addVehicle = (req,res)=>{
                 })
             })
         }else{
-            return res.send({
+            return res.status(400).send({
                 success: false,
                 message: 'Vehicle already on the list'
             })
