@@ -5,14 +5,15 @@ const addVehicle = (req,res)=>{
     let isThere = req.body.name
     addNew.checkVehicle(isThere, result=>{
         let yesThere = 0
-        if(result.length>1){
+        if(result.length>0){
             result.forEach(element=>{
                 if(element.year===req.body.year){
                     yesThere++
                 }
+                console.log(element)
             })
         }
-        if(yesThere<1){
+        if(yesThere==0){
             addNew.addVehicle(data, results=>{
                 return res.send({
                     success: true,
