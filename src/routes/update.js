@@ -1,7 +1,7 @@
-const updates = require('express').Router()
+const update = require('express').Router()
 
-const {updateVehicle} = require('../controller/vehicles')
+const {updateVehicle} = require('../controller/update')
 
-updates.post('/:id', updateVehicle)
+update.patch('/:id', updateVehicle)
 
-module.exports = updates
+module.exports = update

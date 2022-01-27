@@ -6,7 +6,7 @@ const addVehicle = (req,res)=>{
         return res.send({
             success: true,
             message: 'Success add vehicle',
-            results: results
+            result: `Rows affected: ${result.affectedRows}`
         })
     })
 }
