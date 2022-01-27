@@ -65,18 +65,11 @@ const updateVehicle = (req, res)=>{
     vehicleModel.getVehicle(id, results=>{
         if(results.length>0){
             vehicleModel.updateVehicle(data, result=>{
-                if(results.affectedRows>0){
-                    return res.send({
-                        success: true,
-                        message: 'Success add vehicle',
-                        result: `Affected Rows: ${result.affectedRows}`
-                    });
-                }else{
-                    return results.status(500).send({
-                        success:false,
-                        message: 'Server error'
-                    });
-                }
+                return res.send({
+                    success: true,
+                    message: 'Success add vehicle',
+                    result: `Rows affected: ${result.affectedRows}`
+                });
             });
         }else{
             return res.status(404).send({
@@ -92,18 +85,11 @@ const deleteVehicle = (req, res)=>{
     vehicleModel.getVehicle(id, results=>{
         if(results.length>0){
             vehicleModel.deleteVehicle(id, result=>{
-                if(results.affectedRows>0){
-                    return res.send({
-                        success: true,
-                        message: 'Deleted',
-                        result: `Affected Rows: ${result.affectedRows}`
-                    });
-                }else{
-                    return results.status(500).send({
-                        success:false,
-                        message: 'Server error'
-                    });
-                }
+                return res.send({
+                    success: true,
+                    message: 'Deleted',
+                    result: `Affected ROows ${result.affectedRows}`
+                });
             });
         }else{
             return res.status(404).send({
