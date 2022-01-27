@@ -7,3 +7,10 @@ exports.addVehicle = (data, cb)=>{
         cb(res)
     })
 }
+
+exports.checkVehicle = (isThere, cb)=>{
+    db.query('SELECT * FROM vehicle WHERE name=?',[isThere], (err,res)=>{
+        if (err) throw err;
+        cb(res)
+    })
+}
