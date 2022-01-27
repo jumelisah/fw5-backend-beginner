@@ -12,5 +12,4 @@ exports.getVehicle = (id, cb)=>{
         if (err) throw err;
         cb(res)
     })
-
 }
