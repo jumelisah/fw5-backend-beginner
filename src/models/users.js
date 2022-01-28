@@ -14,15 +14,22 @@ exports.getUser = (id, cb)=>{
     });
 };
 
-exports.checkEmail = (email, cb)=>{
-    db.query('SELECT * FROM users WHERE email=?', [email], (err, res)=>{
+exports.addUser = (data, cb)=>{
+    db.query('INSERT INTO users (name, email, password, phone_number, gender, birthdate, address) VALUES(?,?,?,?,?,?,?)', data, (err, res)=>{
         if(err) throw err;
         cb(res);
     });
 };
 
-exports.addUser = (data, cb)=>{
-    db.query('INSERT INTO users (name, email, password, phone_number, gender, birthdate, address) VALUES(?,?,?,?,?,?,?)', data, (err, res)=>{
+exports.updateUser = (data, cb)=>{
+    db.query('UPDATE users SET name=?, email=?, password=?, phone_number=?, gender=?, birthdate=?, address=? WHERE id=?', data, (err,res)=>{
+        if(err) throw err;
+        cb(res);
+    });
+};
+
+exports.deleteUser = (id, cb)=>{
+    db.query('DELETE FROM users WHERE id=?', [id], (err,res)=>{
         if(err) throw err;
         cb(res);
     });
