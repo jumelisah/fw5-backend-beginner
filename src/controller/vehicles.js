@@ -7,7 +7,6 @@ const getVehicles = (req, res)=>{
       message: 'List of Vehicles',
       results : results
     });
-
   });
 };
 
@@ -28,60 +27,58 @@ const getVehicle = (req,res)=>{
     }
   });
 };
-
-const addVehicle = (req,res)=>{
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.class, req.body.location];
-  vehicleModel.checkVehicle(data[0], result=>{
-    let isThere = 0;
-    if(result.length>0){
-      result.forEach(element=>{
-        if(element.year===req.body.year && element.type===req.body.type && element.location===req.body.location){
-          isThere++;
-        }
-      });
+const dataKosong = (data)=>{
+  let isKosong = 0;
+  for(let i = 0; i<data.length;i++){
+    if(data[i]==null || data[i]==undefined || data[i]==''){
+      isKosong++;
     }
-    if(isThere==0){
-      vehicleModel.addVehicle(data, results=>{
-        return res.send({
-          success: true,
-          message: 'Success add vehicle',
-          results: `Rows affected: ${results.affectedRows}`
-        });
-      });
-    }else{
-      return res.status(400).send({
-        success: false,
-        message: 'Vehicle already on the list'
-      });
-    }
-  });
+  }
+  return isKosong;
 };
 
-const updateVehicle = (req, res)=>{
-  const {id} = req.params;
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.seat, req.body.type, req.body.class, req.body.location, id];
-  vehicleModel.getVehicle(id, results=>{
-    if(results.length>0){
-      vehicleModel.checkVehicle(data[0], result=>{
-        let yesThere = 0;
+const dataType = (data)=>{
+  const dataName = ['Name', 'Release Year', 'Cost', 'Qty', 'Seat', 'Type', 'Class', 'location'];
+  let theType = ['isNaN', 'number', 'number', 'number', 'number', 'isNaN', 'isNaN', 'isNaN'];
+  let newData = [];
+  let dataError = [];
+  for(let i = 0; i<data.length; i++){
+    newData.push(parseInt(data[i]));
+    if(theType[i]=='isNaN'){
+      if(isNaN(newData[i])===false){
+        dataError.push(`${dataName[i]} must a STRING`);
+      }
+    }else{
+      if(isNaN(newData[i])===true){
+        dataError.push(`${dataName[i]} must a NUMBER`);
+      }
+    }
+  }
+
+  return dataError;
+};
+
+const addVehicle = (req,res)=>{
+  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.seat, req.body.type, req.body.class, req.body.location];
+  let a = dataKosong(data);
+  let b = dataType(data);
+  vehicleModel.checkVehicle(data[0], result=>{
+    if(a<1){
+      if(b<1){
+        let isThere = 0;
         if(result.length>0){
           result.forEach(element=>{
             if(element.year===req.body.year && element.type===req.body.type && element.location===req.body.location){
-              if(element.id==req.params.id){
-                yesThere = 0;
-              }else{
-                yesThere++;
-              }
+              isThere++;
             }
-            console.log(element);
           });
         }
-        if(yesThere==0){
-          vehicleModel.updateVehicle(data, result=>{
+        if(isThere==0){
+          vehicleModel.addVehicle(data, results=>{
             return res.send({
               success: true,
-              message: 'Success update vehicle',
-              result: `Rows affected: ${result.affectedRows}`
+              message: 'Success add vehicle',
+              results: `Rows affected: ${results.affectedRows}`
             });
           });
         }else{
@@ -90,11 +87,75 @@ const updateVehicle = (req, res)=>{
             message: 'Vehicle already on the list'
           });
         }
-      });
+      }else{
+        return res.status(400).send({
+          success: false,
+          message: b
+        });
+      }
     }else{
-      return res.status(404).send({
+      return res.send({
         success: false,
-        message: 'Vehicle not found'
+        message: 'Can\'t input empty data'
+      });
+    }
+  });
+};
+
+const updateVehicle = (req, res)=>{
+  const {id} = req.params;
+  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.seat, req.body.type, req.body.class, req.body.location, id];
+  let a = dataKosong(data);
+  let b = dataType(data);
+  vehicleModel.getVehicle(id, results=>{
+    if(a<1){
+      if(b<1){
+        if(results.length>0){
+          vehicleModel.checkVehicle(data[0], result=>{
+            console.log(dataType(data));
+            let yesThere = 0;
+            if(result.length>0){
+              result.forEach(element=>{
+                if(element.year===req.body.year && element.type===req.body.type && element.location===req.body.location){
+                  if(element.id==req.params.id){
+                    yesThere = 0;
+                  }else{
+                    yesThere++;
+                  }
+                }
+              });
+            }
+            if(yesThere==0){
+              vehicleModel.updateVehicle(data, result=>{
+                return res.send({
+                  success: true,
+                  message: 'Success update vehicle',
+                  result: `Rows affected: ${result.affectedRows}`
+                });
+              });
+            }else{
+              return res.status(400).send({
+                success: false,
+                message: 'Vehicle already on the list'
+              });
+            }
+          });
+        }else{
+          return res.status(404).send({
+            success: false,
+            message: 'Vehicle not found'
+          });
+        }
+      }else{
+        return res.status(400).send({
+          success: false,
+          message: b
+        });
+      }
+    }else{
+      return res.status(400).send({
+        success: false,
+        message: 'Can\'t input empty data'
       });
     }
   });
@@ -103,18 +164,25 @@ const updateVehicle = (req, res)=>{
 const deleteVehicle = (req, res)=>{
   const {id} = req.params;
   vehicleModel.getVehicle(id, results=>{
-    if(results.length>0){
-      vehicleModel.deleteVehicle(id, result=>{
-        return res.send({
-          success: true,
-          message: 'Deleted',
-          result: `Affected ROows ${result.affectedRows}`
+    if(id!==null && id!==undefined){
+      if(results.length>0){
+        vehicleModel.deleteVehicle(id, result=>{
+          return res.send({
+            success: true,
+            message: 'Deleted',
+            result: `Affected ROows ${result.affectedRows}`
+          });
         });
-      });
+      }else{
+        return res.status(404).send({
+          success: false,
+          message: 'Vehicle not found'
+        });
+      }
     }else{
-      return res.status(404).send({
+      return res.status(400).send({
         success: false,
-        message: 'Vehicle not found'
+        message: 'Id tidak boleh kosong'
       });
     }
   });

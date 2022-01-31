@@ -7,5 +7,7 @@ vehicles.get('/:id', getVehicle);
 vehicles.post('/', addVehicle);
 vehicles.patch('/:id', updateVehicle);
 vehicles.delete('/:id', deleteVehicle);
+vehicles.delete('/', deleteVehicle);
+
 
 module.exports = vehicles;
