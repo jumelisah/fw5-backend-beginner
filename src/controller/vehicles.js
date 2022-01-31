@@ -15,7 +15,7 @@ const getVehicle = (req,res)=>{
   const {id} = req.params;
   vehicleModel.getVehicle(id, results=>{
     if(results.length>0){
-      return res.send({
+      return res.json({
         success: true,
         message: 'Vehicle details',
         results: results[0]
@@ -38,7 +38,6 @@ const addVehicle = (req,res)=>{
         if(element.year===req.body.year && element.type===req.body.type && element.location===req.body.location){
           isThere++;
         }
-        console.log(element);
       });
     }
     if(isThere==0){
@@ -81,7 +80,7 @@ const updateVehicle = (req, res)=>{
           vehicleModel.updateVehicle(data, result=>{
             return res.send({
               success: true,
-              message: 'Success add vehicle',
+              message: 'Success update vehicle',
               result: `Rows affected: ${result.affectedRows}`
             });
           });
