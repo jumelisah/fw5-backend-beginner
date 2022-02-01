@@ -7,5 +7,6 @@ users.get('/:id', getUser);
 users.post('/', addUser);
 users.patch('/:id', updateUser);
 users.delete('/:id', deleteUser);
+users.delete('/', deleteUser);
 
 module.exports = users;

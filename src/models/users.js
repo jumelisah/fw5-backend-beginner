@@ -21,6 +21,20 @@ exports.checkContact = (contact, cb)=>{
   });
 };
 
+exports.checkEmail = (email, cb)=>{
+  db.query('SELECT * FROM users WHERE email=?', [email], (err, res)=>{
+    if(err) throw err;
+    cb(res);
+  });
+};
+
+exports.checkPhone = (phone, cb)=>{
+  db.query('SELECT * FROM users WHERE phone_number=?', [phone], (err, res)=>{
+    if(err) throw err;
+    cb(res);
+  });
+};
+
 exports.addUser = (data, cb)=>{
   db.query('INSERT INTO users (name, email, password, phone_number, gender, birthdate, address) VALUES(?,?,?,?,?,?,?)', data, (err, res)=>{
     if(err) throw err;
