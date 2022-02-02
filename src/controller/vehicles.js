@@ -44,8 +44,8 @@ const dataKosong = (data)=>{
 };
 
 const dataType = (data)=>{
-  const dataName = ['Name', 'Release Year', 'Cost', 'Qty', 'Seat', 'Type', 'Class', 'location'];
-  let theType = ['isNaN', 'number', 'number', 'number', 'number', 'isNaN', 'isNaN', 'isNaN'];
+  const dataName = ['name', 'year', 'cost', 'available', 'type', 'seat', 'class', 'location'];
+  let theType = ['isNaN', 'number', 'number', 'number', 'isNaN', 'number', 'isNaN', 'isNaN'];
   let newData = [];
   let dataError = [];
   for(let i = 0; i<data.length; i++){
@@ -65,7 +65,7 @@ const dataType = (data)=>{
 };
 
 const addVehicle = (req,res)=>{
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.seat, req.body.type, req.body.class, req.body.location];
+  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.class, req.body.location];
   let a = dataKosong(data);
   let b = dataType(data);
   vehicleModel.checkVehicle(data[0], result=>{
