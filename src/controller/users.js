@@ -3,8 +3,9 @@ const usersProfile = require('../models/users');
 const getUsers = (req, res)=>{
   let {name, page, limit} = req.query;
   name = name || '';
-  page = parseInt(page) || 0;
+  page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
+
   let offset = (page-1)*limit;
   const data = {name, page, limit, offset};
   usersProfile.getUsers(data, results=>{
@@ -17,21 +18,29 @@ const getUsers = (req, res)=>{
 };
 
 const getUser = (req, res)=>{
-  const {id} = req.params;
-  usersProfile.getUser(id, result=>{
-    if(result.length>0){
-      return res.json({
-        success: true,
-        message: 'User found',
-        result : result[0]
-      });
-    }else{
-      return res.status(404).send({
-        success: false,
-        message: `User with ID: ${id} was not found`
-      });
-    }
-  });
+  let {id} = req.params;
+  id = id || 0;
+  if(id>0){
+    usersProfile.getUser(id, result=>{
+      if(result.length>0){
+        return res.json({
+          success: true,
+          message: 'User found',
+          result : result[0]
+        });
+      }else{
+        return res.status(404).send({
+          success: false,
+          message: `User with ID: ${id} was not found`
+        });
+      }
+    });
+  }else{
+    return res.send({
+      success: false,
+      message: 'Please input the ID'
+    });
+  }
 };
 
 const isNull = (data)=>{

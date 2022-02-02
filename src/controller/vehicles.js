@@ -3,7 +3,7 @@ const vehicleModel = require('../models/vehicles');
 const getVehicles = (req, res)=>{
   let {name, page, limit} = req.query;
   name = name || '';
-  page = parseInt(page) || 0;
+  page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
   const offset = (page-1)*limit;
   const data = {name, page, limit, offset};
