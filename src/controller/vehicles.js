@@ -1,7 +1,13 @@
 const vehicleModel = require('../models/vehicles');
 
 const getVehicles = (req, res)=>{
-  vehicleModel.getVehicles(results=>{
+  let {name, page, limit} = req.query;
+  name = name || '';
+  page = parseInt(page) || 0;
+  limit = parseInt(limit) || 5;
+  const offset = (page-1)*limit;
+  const data = {name, page, limit, offset};
+  vehicleModel.getVehicles(data, results=>{
     return res.json({
       success: true,
       message: 'List of Vehicles',
@@ -64,7 +70,7 @@ const addVehicle = (req,res)=>{
   let b = dataType(data);
   vehicleModel.checkVehicle(data[0], result=>{
     if(a<1){
-      if(b<1){
+      if(b.length<1){
         let isThere = 0;
         if(result.length>0){
           result.forEach(element=>{
@@ -105,6 +111,15 @@ const addVehicle = (req,res)=>{
 const updateVehicle = (req, res)=>{
   const {id} = req.params;
   const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.seat, req.body.type, req.body.class, req.body.location, id];
+  const cb = (result)=>{
+    vehicleModel.getVehicle(id, ress=>{
+      return res.json({
+        success: false,
+        message: `Vehicle was updated. Rows Affected: ${result.affectedRows}`,
+        result: ress[0]
+      });
+    });
+  };
   let a = dataKosong(data);
   let b = dataType(data);
   vehicleModel.getVehicle(id, results=>{
@@ -126,13 +141,7 @@ const updateVehicle = (req, res)=>{
               });
             }
             if(yesThere==0){
-              vehicleModel.updateVehicle(data, result=>{
-                return res.send({
-                  success: true,
-                  message: 'Success update vehicle',
-                  result: `Rows affected: ${result.affectedRows}`
-                });
-              });
+              vehicleModel.updateVehicle(data, cb);
             }else{
               return res.status(400).send({
                 success: false,

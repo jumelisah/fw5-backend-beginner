@@ -1,7 +1,13 @@
 const usersProfile = require('../models/users');
 
 const getUsers = (req, res)=>{
-  usersProfile.getUsers(results=>{
+  let {name, page, limit} = req.query;
+  name = name || '';
+  page = parseInt(page) || 0;
+  limit = parseInt(limit) || 5;
+  let offset = (page-1)*limit;
+  const data = {name, page, limit, offset};
+  usersProfile.getUsers(data, results=>{
     return res.json({
       success : true,
       message : 'Users list',
@@ -38,33 +44,69 @@ const isNull = (data)=>{
   return a;
 };
 
+const checkType = (data)=>{
+  const dataName = ['name', 'email', 'password', 'phone_number', 'gender', 'birthdate', 'address'];
+  const dataType = ['isNaN', 'isNaN', 'isNaN', 'number', 'isNaN', 'number', 'isNaN'];
+  const throwData = [];
+  const dataError = [];
+  for(let i=0; i<data.length;i++){
+    throwData.push(parseInt(data[i]));
+  }
+  for(let j=0; j<throwData.length;j++){
+    if(dataType[j]=='isNaN'){
+      if(j!==2){
+        if(isNaN(throwData[j])==false){
+          dataError.push(`${dataName[j]} must be STRING`);
+        }
+      }
+    }else{
+      if(typeof throwData[j]!=='number'){
+        dataError.push(`${dataName[j]} must be NUMBER`);
+      }
+    }
+  }
+  return dataError;
+};
+
 const addUser = (req, res)=>{
   const {name, email, password, phone_number, gender, birthdate, address} = req.body;
   const data = [name, email, password, phone_number, gender, birthdate, address];
   let b = isNull(data);
+  let c = checkType(data);
   if(b<1){
-    usersProfile.checkEmail(data[1], results=>{
-      if(results.length<1){
-        usersProfile.checkPhone(data[3], result=>{
-          if(result.length<1){
-            return res.json({
-              success: true,
-              message: 'User was added'
-            });
-          }else{
-            return res.status(403).send({
-              success: false,
-              message: 'Phone number has been used'
-            });
-          }
-        });
-      }else{
-        return res.status(403).send({
-          success: false,
-          message: 'Email has been used'
-        });
-      }
-    });
+    if(c.length<1){
+      usersProfile.checkEmail(data[1], results=>{
+        if(results.length<1){
+          usersProfile.checkPhone(data[3], result=>{
+            if(result.length<1){
+              usersProfile.addUser(data, ress=>{
+                return res.json({
+                  success: true,
+                  message: 'User was added',
+                  result: `Rows affected: ${ress.affectedRows}`
+                });
+              });
+            }else{
+              return res.status(403).send({
+                success: false,
+                message: 'Phone number has been used'
+              });
+            }
+          });
+        }else{
+          return res.status(403).send({
+            success: false,
+            message: 'Email has been used'
+          });
+        }
+      });
+
+    }else{
+      return res.status(400).send({
+        success: false,
+        message: c
+      });
+    }
   }else{
     return res.status(400).send({
       success: false,
@@ -78,41 +120,51 @@ const updateUser = (req, res)=>{
   const {name, email, password, phone_number, gender, birthdate, address} = req.body;
   const data = [name, email, password, phone_number, gender, birthdate, address, id];
   const cb = (ress)=>{
-    return res.json({
-      success: true,
-      message: 'Success update user',
-      result: ress.affectedRows
+    usersProfile.getUser(id, resId=>{
+      return res.json({
+        success: true,
+        message: `Success update user. Affected Rows: ${ress.affectedRows}`,
+        result: resId
+      });
     });
   };
   let b = isNull(data);
+  let c = checkType(data);
   if(b<1){
-    usersProfile.checkEmail(email, results=>{
-      if(results.length>=1){
-        if(results[0].id==id){
-          usersProfile.checkPhone(phone_number, result=>{
-            if(result.length>=1){
-              if(result[0].id==id){
-                usersProfile.updateUser(data, cb);
+    if(c.length<1){
+      usersProfile.checkEmail(email, results=>{
+        if(results.length>=1){
+          if(results[0].id==id){
+            usersProfile.checkPhone(phone_number, result=>{
+              if(result.length>=1){
+                if(result[0].id==id){
+                  usersProfile.updateUser(data, cb);
+                }else{
+                  return res.status(400).send({
+                    success: false,
+                    message: 'Phone number has been used'
+                  });
+                }
               }else{
-                return res.status(400).send({
-                  success: false,
-                  message: 'Phone number has been used'
-                });
+                usersProfile.updateUser(data, cb);
               }
-            }else{
-              usersProfile.updateUser(data, cb);
-            }
-          });
+            });
+          }else{
+            return res.status(400).send({
+              success: false,
+              message: 'Email has been used'
+            });
+          }
         }else{
-          return res.status(400).send({
-            success: false,
-            message: 'Email has been used'
-          });
+          usersProfile.updateUser(data, cb);
         }
-      }else{
-        usersProfile.updateUser(data, cb);
-      }
-    });
+      });
+    }else{
+      return res.status(400).send({
+        success: false,
+        message: c
+      });
+    }
   }else{
     return res.status(400).send({
       success: false,
@@ -143,7 +195,7 @@ const deleteUser = (req,res)=>{
   }else{
     return res.status(400).send({
       success: false,
-      message: 'ID undefined'
+      message: 'Undefined ID'
     });}
 };
 

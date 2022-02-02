@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
-exports.getUsers = (cb)=>{
-  db.query('SELECT * FROM users', (err,res)=>{
+exports.getUsers = (data, cb)=>{
+  db.query(`SELECT * FROM users WHERE name LIKE '%${data.name}%' LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
     if(err) throw err;
     cb(res);
   });

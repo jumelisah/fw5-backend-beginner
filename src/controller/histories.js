@@ -51,43 +51,73 @@ const isNull = (data)=>{
   return a;
 };
 
+const dataType = (data)=>{
+  const dataName = ['vehicle_id', 'user_id', 'status'];
+  const typeData = ['number', 'number', 'isNaN'];
+  const dataThrow = [];
+  const dataError = [];
+  for(let i=0; i<dataName.length;i++){
+    dataThrow.push(parseInt(data[i]));
+  }
+  for(let j=0; j<dataThrow.length;j++){
+    if(typeData[j]!=='isNaN'){
+      if(isNaN(dataThrow[j])==true){
+        dataError.push(`${dataName[j]} must be a NUMBER`);
+      }
+    }else{
+      if(isNaN(dataThrow[j])==false){
+        dataError.push(`${dataName[j]} must be a STRING`);
+      }
+    }
+  }
+  return dataError;
+};
+
 const addHistories = (req, res)=>{
   const {vehicle_id, user_id, status} = req.body;
   const data = [vehicle_id, user_id, status];
   let b = isNull(data);
+  let c = dataType(data);
   if(b<1){
-    vehicles.getVehicle(vehicle_id, results=>{
-      if(results.length>0){
-        if(results[0].available>0){
-          users.getUser(user_id, ress=>{
-            if(ress.length>0){
-              rentHistories.addHistories(data, result=>{
-                return res.json({
-                  success: true,
-                  message: 'Data added',
-                  result: `Affected Rows : ${result.affectedRows}`
+    if(c.length<1){
+      vehicles.getVehicle(vehicle_id, results=>{
+        if(results.length>0){
+          if(results[0].available>0){
+            users.getUser(user_id, ress=>{
+              if(ress.length>0){
+                rentHistories.addHistories(data, result=>{
+                  return res.json({
+                    success: true,
+                    message: 'Data added',
+                    result: `Affected Rows : ${result.affectedRows}`
+                  });
                 });
-              });
-            }else{
-              return res.status(404).send({
-                success: false,
-                message: 'User not found'
-              });
-            }
-          });
+              }else{
+                return res.status(404).send({
+                  success: false,
+                  message: 'User not found'
+                });
+              }
+            });
+          }else{
+            return res.status(400).send({
+              success: false,
+              message: 'Vehicle not available'
+            });
+          }
         }else{
-          return res.status(400).send({
+          return res.status(404).send({
             success: false,
-            message: 'Vehicle not available'
+            message: `Can't find vehicle with ID: ${vehicle_id}`
           });
         }
-      }else{
-        return res.status(404).send({
-          success: false,
-          message: `Can't find vehicle with ID: ${vehicle_id}`
-        });
-      }
-    });
+      });
+    }else{
+      return res.status(400).send({
+        success: false,
+        message: c
+      });
+    }
   }else{
     return res.status(400).send({
       success: false,
@@ -103,48 +133,56 @@ const updateHistory = (req, res)=>{
   rentHistories.getHistory(id, resultId=>{
     if(resultId.length>0){
       let b = isNull(data);
+      let c = dataType(data);
       if(b<1){
-        vehicles.getVehicle(vehicle_id, results=>{
-          if(results.length>0){
-            if(results[0].available>0){
-              users.getUser(user_id, ress=>{
-                if(ress.length>0){
-                  rentHistories.getHistory(id, results=>{
-                    if(results.length>0){
-                      rentHistories.updateHistory(data, result=>{
-                        return res.json({
-                          success: true,
-                          message: 'History was update',
-                          result: `Rows affected: ${result.affectedRows}`
+        if(c.length<1){
+          vehicles.getVehicle(vehicle_id, results=>{
+            if(results.length>0){
+              if(results[0].available>0){
+                users.getUser(user_id, ress=>{
+                  if(ress.length>0){
+                    rentHistories.getHistory(id, results=>{
+                      if(results.length>0){
+                        rentHistories.updateHistory(data, result=>{
+                          return res.json({
+                            success: true,
+                            message: 'History was update',
+                            result: `Rows affected: ${result.affectedRows}`
+                          });
                         });
-                      });
-                    }else{
-                      return res.status(404).send({
-                        success: false,
-                        message: `History with ID: ${id} not found`
-                      });
-                    }
-                  });
-                }else{
-                  return res.status(404).send({
-                    success: false,
-                    message: `User with ID: ${user_id} was not found`
-                  });
-                }
-              });
+                      }else{
+                        return res.status(404).send({
+                          success: false,
+                          message: `History with ID: ${id} not found`
+                        });
+                      }
+                    });
+                  }else{
+                    return res.status(404).send({
+                      success: false,
+                      message: `User with ID: ${user_id} was not found`
+                    });
+                  }
+                });
+              }else{
+                return res.status(400).send({
+                  success: false,
+                  message: 'Vehicle not available'
+                });
+              }
             }else{
-              return res.status(400).send({
+              return res.status(404).send({
                 success: false,
-                message: 'Vehicle not available'
+                message: `Can't find vehicle with ID: ${vehicle_id}`
               });
             }
-          }else{
-            return res.status(404).send({
-              success: false,
-              message: `Can't find vehicle with ID: ${vehicle_id}`
-            });
-          }
-        });
+          });
+        }else{
+          return res.status(400).send({
+            success: false,
+            message: c
+          });
+        }
       }else{
         return res.status(400).send({
           success: false,
@@ -182,7 +220,7 @@ const deleteHistory = (req, res)=>{
   }else{
     return res.status(400).send({
       success: false,
-      message: 'NULL ID'
+      message: 'Undefined ID'
     });
   }
 };

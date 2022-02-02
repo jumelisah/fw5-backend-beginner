@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
-exports.getVehicles = (cb)=>{
-  db.query('SELECT * FROM vehicles', (err,res)=>{
+exports.getVehicles = (data, cb)=>{
+  db.query(`SELECT * FROM vehicles WHERE name LIKE '%${data.name}%' LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
     if (err) throw err;
     cb(res);
   });
