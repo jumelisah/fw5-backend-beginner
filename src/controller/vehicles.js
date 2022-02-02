@@ -11,7 +11,7 @@ const getVehicles = (req, res)=>{
     return res.json({
       success: true,
       message: 'List of Vehicles',
-      results : results
+      result : results
     });
   });
 };
@@ -23,7 +23,7 @@ const getVehicle = (req,res)=>{
       return res.json({
         success: true,
         message: 'Vehicle details',
-        results: results[0]
+        result: results[0]
       });
     }else{
       return res.status(404).send({
@@ -81,10 +81,13 @@ const addVehicle = (req,res)=>{
         }
         if(isThere==0){
           vehicleModel.addVehicle(data, results=>{
-            return res.send({
-              success: true,
-              message: 'Success add vehicle',
-              results: `Rows affected: ${results.affectedRows}`
+            const dataVe = [req.body.name, req.body.year, req.body.location];
+            vehicleModel.showVehicle(dataVe, ress=>{
+              return res.send({
+                success: true,
+                message: `Success add vehicle. Rows Affected: ${results.affectedRows}`,
+                result: ress
+              });
             });
           });
         }else{

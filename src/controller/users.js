@@ -80,10 +80,12 @@ const addUser = (req, res)=>{
           usersProfile.checkPhone(data[3], result=>{
             if(result.length<1){
               usersProfile.addUser(data, ress=>{
-                return res.json({
-                  success: true,
-                  message: 'User was added',
-                  result: `Rows affected: ${ress.affectedRows}`
+                usersProfile.checkEmail(email, resEmail=>{
+                  return res.json({
+                    success: true,
+                    message: `User was added. Rows Affected: ${ress.affectedRows}`,
+                    result: resEmail[0]
+                  });
                 });
               });
             }else{

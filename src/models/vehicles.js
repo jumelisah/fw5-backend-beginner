@@ -44,6 +44,9 @@ exports.deleteVehicle = (id, cb)=>{
     });
 };
 
-// exports.isAvailable = (id, cb)=>{
-//   db.query('SELECT * FROM vehicles WHERE id')
-// }
+exports.showVehicle = (data, cb)=>{
+  db.query('SELECT * FROM vehicles WHERE name = ? AND year =? AND location=?', data, (err, res)=>{
+    if(err) throw err;
+    cb(res);
+  });
+};
