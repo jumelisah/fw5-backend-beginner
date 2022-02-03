@@ -44,8 +44,8 @@ const dataKosong = (data)=>{
 };
 
 const dataType = (data)=>{
-  const dataName = ['name', 'year', 'cost', 'available', 'type', 'seat', 'class', 'location'];
-  let theType = ['isNaN', 'number', 'number', 'number', 'isNaN', 'number', 'isNaN', 'isNaN'];
+  const dataName = ['name', 'year', 'cost', 'available', 'type', 'seat', 'category_id', 'location'];
+  let theType = ['isNaN', 'number', 'number', 'number', 'isNaN', 'number', 'number', 'isNaN'];
   let newData = [];
   let dataError = [];
   for(let i = 0; i<data.length; i++){
@@ -65,7 +65,7 @@ const dataType = (data)=>{
 };
 
 const addVehicle = (req,res)=>{
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.class, req.body.location];
+  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.category_id, req.body.location];
   let a = dataKosong(data);
   let b = dataType(data);
   vehicleModel.checkVehicle(data[0], result=>{
@@ -105,7 +105,7 @@ const addVehicle = (req,res)=>{
     }else{
       return res.send({
         success: false,
-        message: 'Can\'t input empty data'
+        message: 'Please fill all column'
       });
     }
   });
@@ -113,7 +113,7 @@ const addVehicle = (req,res)=>{
 
 const updateVehicle = (req, res)=>{
   const {id} = req.params;
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.seat, req.body.type, req.body.class, req.body.location, id];
+  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.category_id, req.body.location, id];
   const cb = (result)=>{
     vehicleModel.getVehicle(id, ress=>{
       return res.json({
@@ -167,7 +167,7 @@ const updateVehicle = (req, res)=>{
     }else{
       return res.status(400).send({
         success: false,
-        message: 'Can\'t input empty data'
+        message: 'Please fill all column'
       });
     }
   });
@@ -188,7 +188,7 @@ const deleteVehicle = (req, res)=>{
       }else{
         return res.status(404).send({
           success: false,
-          message: 'Vehicle not found'
+          message: `Vehicle with ID: ${id} not found`
         });
       }
     }else{

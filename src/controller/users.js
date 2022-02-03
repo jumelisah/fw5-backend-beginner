@@ -141,45 +141,52 @@ const updateUser = (req, res)=>{
   };
   let b = isNull(data);
   let c = checkType(data);
-  if(b<1){
-    if(c.length<1){
-      usersProfile.checkEmail(email, results=>{
-        if(results.length>=1){
-          if(results[0].id==id){
-            usersProfile.checkPhone(phone_number, result=>{
-              if(result.length>=1){
-                if(result[0].id==id){
-                  usersProfile.updateUser(data, cb);
+  if(id!==null && id!==undefined){
+    if(b<1){
+      if(c.length<1){
+        usersProfile.checkEmail(email, results=>{
+          if(results.length>=1){
+            if(results[0].id==id){
+              usersProfile.checkPhone(phone_number, result=>{
+                if(result.length>=1){
+                  if(result[0].id==id){
+                    usersProfile.updateUser(data, cb);
+                  }else{
+                    return res.status(400).send({
+                      success: false,
+                      message: 'Phone number has been used'
+                    });
+                  }
                 }else{
-                  return res.status(400).send({
-                    success: false,
-                    message: 'Phone number has been used'
-                  });
+                  usersProfile.updateUser(data, cb);
                 }
-              }else{
-                usersProfile.updateUser(data, cb);
-              }
-            });
+              });
+            }else{
+              return res.status(400).send({
+                success: false,
+                message: 'Email has been used'
+              });
+            }
           }else{
-            return res.status(400).send({
-              success: false,
-              message: 'Email has been used'
-            });
+            usersProfile.updateUser(data, cb);
           }
-        }else{
-          usersProfile.updateUser(data, cb);
-        }
-      });
+        });
+      }else{
+        return res.status(400).send({
+          success: false,
+          message: c
+        });
+      }
     }else{
       return res.status(400).send({
         success: false,
-        message: c
+        message: 'Please fill all columns'
       });
     }
   }else{
     return res.status(400).send({
       success: false,
-      message: 'Please fill all columns'
+      message: 'Undefined ID'
     });
   }
 };

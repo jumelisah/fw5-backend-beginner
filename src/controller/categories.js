@@ -85,22 +85,29 @@ const updateCategory = (req, res)=>{
 
 const deleteCategory = (req, res)=>{
   const {id} = req.params;
-  vehicleCategories.getCategory(id, results=>{
-    if(results.length>0){
-      vehicleCategories.deleteCategory(id, result=>{
-        return res.json({
-          success: true,
-          message: `Category with ID: ${id} was deleted`,
-          result : `Rows Affected: ${result.affectedRows}`
+  if(id!==null && id!==undefined){
+    vehicleCategories.getCategory(id, results=>{
+      if(results.length>0){
+        vehicleCategories.deleteCategory(id, result=>{
+          return res.json({
+            success: true,
+            message: `Category with ID: ${id} was deleted`,
+            result : `Rows Affected: ${result.affectedRows}`
+          });
         });
-      });
-    }else{
-      return res.status(400).send({
-        success: false,
-        message: `Can't find category with ID: ${id}`
-      });
-    }
-  });
+      }else{
+        return res.status(400).send({
+          success: false,
+          message: `Can't find category with ID: ${id}`
+        });
+      }
+    });
+  }else{
+    return res.status(400).send({
+      sucess: false,
+      message: 'Undefined ID'
+    });
+  }
 };
 
 module.exports = {getCategories, getCategory, addCategory, updateCategory, deleteCategory};

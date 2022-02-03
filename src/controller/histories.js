@@ -52,8 +52,8 @@ const isNull = (data)=>{
 };
 
 const dataType = (data)=>{
-  const dataName = ['vehicle_id', 'user_id', 'status'];
-  const typeData = ['number', 'number', 'isNaN'];
+  const dataName = ['vehicle_id', 'user_id', 'prepayment', 'rent_date', 'return_date'];
+  const typeData = ['number', 'number', 'number', 'number', 'number'];
   const dataThrow = [];
   const dataError = [];
   for(let i=0; i<dataName.length;i++){
@@ -74,8 +74,8 @@ const dataType = (data)=>{
 };
 
 const addHistories = (req, res)=>{
-  const {vehicle_id, user_id, status} = req.body;
-  const data = [vehicle_id, user_id, status];
+  const {vehicle_id, user_id, prepayment, rent_date, return_date} = req.body;
+  const data = [vehicle_id, user_id, prepayment, rent_date, return_date];
   let b = isNull(data);
   let c = dataType(data);
   if(b<1){
@@ -128,8 +128,8 @@ const addHistories = (req, res)=>{
 
 const updateHistory = (req, res)=>{
   const {id} = req.params;
-  const {vehicle_id, user_id, status} = req.body;
-  const data = [vehicle_id, user_id, status, id];
+  const {vehicle_id, user_id, prepayment, rent_date, return_date} = req.body;
+  const data = [vehicle_id, user_id, prepayment, rent_date, return_date, id];
   rentHistories.getHistory(id, resultId=>{
     if(resultId.length>0){
       let b = isNull(data);

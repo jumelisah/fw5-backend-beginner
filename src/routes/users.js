@@ -6,6 +6,7 @@ users.get('/', getUsers);
 users.get('/:id', getUser);
 users.post('/', addUser);
 users.patch('/:id', updateUser);
+users.patch('/', updateUser);
 users.delete('/:id', deleteUser);
 users.delete('/', deleteUser);
 
