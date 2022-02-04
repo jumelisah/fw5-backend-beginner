@@ -18,32 +18,71 @@ const getVehicles = (req, res)=>{
 
 const getVehicle = (req,res)=>{
   const {id} = req.params;
-  vehicleModel.getVehicle(id, results=>{
-    if(results.length>0){
-      return res.json({
-        success: true,
-        message: 'Vehicle details',
-        result: results[0]
-      });
-    }else{
-      return res.status(404).send({
-        success: false,
-        message: 'Vehicle not found'
-      });
-    }
-  });
-};
-const dataKosong = (data)=>{
-  let isKosong = 0;
-  for(let i = 0; i<data.length;i++){
-    if(data[i]==null || data[i]==undefined || data[i]==''){
-      isKosong++;
-    }
+  if(id>0){
+    vehicleModel.getVehicle(id, results=>{
+      if(results.length>0){
+        return res.json({
+          success: true,
+          message: 'Vehicle details',
+          result: results[0]
+        });
+      }else{
+        return res.status(404).send({
+          success: false,
+          message: `Vehicle with ID: ${id} not found`
+        });
+      }
+    });
+  }else{
+    return res.status(400).send({
+      success: false,
+      message: 'ID should be a number greater than 0'
+    });
   }
-  return isKosong;
 };
 
-const dataType = (data)=>{
+const getCategory = (req, res)=>{
+  const {category_id} = req.params;
+  let {name, page, limit} = req.query;
+  name = name || '';
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 5;
+  const offset = (page-1)*limit;
+  const data = {name, page, limit, offset, category_id};
+  if(category_id>0){
+    vehicleModel.getCategory(data, result=>{
+      if(result.length>0){
+        return res.json({
+          success: true,
+          message: `Vehicles by category_id: ${category_id}`,
+          result: result
+        });
+      }else{
+        return res.status(404).send({
+          success: false,
+          message: `Vehicle with category_id: ${category_id} not found`
+        });
+      }
+    });
+  }else{
+    return res.status(400).send({
+      success: false,
+      message: 'Undefined ID'
+    });
+  }
+};
+
+const isNull = (data)=>{
+  let notNull = 0;
+  for(let i = 0; i<data.length;i++){
+    if(data[i]==null || data[i]==undefined || data[i]==''){
+      notNull++;
+    }
+  }
+  return notNull;
+};
+
+const isMatch = (data)=>{
   const dataName = ['name', 'year', 'cost', 'available', 'type', 'seat', 'category_id', 'location'];
   let theType = ['isNaN', 'number', 'number', 'number', 'isNaN', 'number', 'number', 'isNaN'];
   let newData = [];
@@ -60,60 +99,75 @@ const dataType = (data)=>{
       }
     }
   }
-
   return dataError;
 };
 
-const addVehicle = (req,res)=>{
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.category_id, req.body.location];
-  let a = dataKosong(data);
-  let b = dataType(data);
-  vehicleModel.checkVehicle(data[0], result=>{
-    if(a<1){
-      if(b.length<1){
+const editData = (data, cb, callback, res)=>{
+  let a = isNull(data);
+  let b = isMatch(data);
+  if(a<1){
+    if(b.length<1){
+      vehicleModel.checkVehicle(data[0], result=>{
         let isThere = 0;
         if(result.length>0){
           result.forEach(element=>{
-            if(element.year===req.body.year && element.type===req.body.type && element.location===req.body.location){
-              isThere++;
+            if(element.name==data[0] && element.id!=data[8]){
+              if(element.year==data[1] && element.cost==data[2] && element.type==data[4] && element.location==data[7]){
+                isThere++;
+              }
+              console.log(element.id, data[8], isThere);
             }
           });
         }
-        if(isThere==0){
-          vehicleModel.addVehicle(data, results=>{
-            const dataVe = [req.body.name, req.body.year, req.body.location];
-            vehicleModel.showVehicle(dataVe, ress=>{
-              return res.send({
-                success: true,
-                message: `Success add vehicle. Rows Affected: ${results.affectedRows}`,
-                result: ress
-              });
-            });
-          });
+        if(isThere<1){
+          callback(data, cb);
         }else{
           return res.status(400).send({
             success: false,
             message: 'Vehicle already on the list'
           });
         }
-      }else{
-        return res.status(400).send({
-          success: false,
-          message: b
-        });
-      }
+      });
     }else{
-      return res.send({
+      return res.status(400).send({
         success: false,
-        message: 'Please fill all column'
+        message: b
       });
     }
-  });
+  }else{
+    return res.status(400).send({
+      success: false,
+      message: 'Please fill in all the fields'
+    });
+  }
+};
+
+const addVehicle = (req,res)=>{
+  const {name, year, cost, available, type, seat, category_id, location} = req.body;
+  const data = [name, year, cost, available, type, seat, category_id, location];
+  let cb = (result)=>{
+    vehicleModel.checkVehicle(name, ress=>{
+      let i = ress.length-1;
+      return res.json({
+        success: true,
+        message: `Vehicle was successfully add. Rows Affected: ${result.affectedRows}`,
+        result: ress[i]
+      });
+    });
+  };
+  editData(data, cb, vehicleModel.addVehicle, res);
 };
 
 const updateVehicle = (req, res)=>{
   const {id} = req.params;
-  const data = [req.body.name, req.body.year, req.body.cost, req.body.available, req.body.type, req.body.seat, req.body.category_id, req.body.location, id];
+  const {name, year, cost, available, type, seat, category_id, location} = req.body;
+  const data = [name, year, cost, available, type, seat, category_id, location, id];
+  if(id==null || id==undefined){
+    return res.status(400).send({
+      success: false,
+      message: 'Undefined ID'
+    });
+  }
   const cb = (result)=>{
     vehicleModel.getVehicle(id, ress=>{
       return res.json({
@@ -123,81 +177,58 @@ const updateVehicle = (req, res)=>{
       });
     });
   };
-  let a = dataKosong(data);
-  let b = dataType(data);
-  vehicleModel.getVehicle(id, results=>{
-    if(a<1){
-      if(b<1){
-        if(results.length>0){
-          vehicleModel.checkVehicle(data[0], result=>{
-            console.log(dataType(data));
-            let yesThere = 0;
-            if(result.length>0){
-              result.forEach(element=>{
-                if(element.year===req.body.year && element.type===req.body.type && element.location===req.body.location){
-                  if(element.id==req.params.id){
-                    yesThere = 0;
-                  }else{
-                    yesThere++;
-                  }
-                }
-              });
-            }
-            if(yesThere==0){
-              vehicleModel.updateVehicle(data, cb);
-            }else{
-              return res.status(400).send({
-                success: false,
-                message: 'Vehicle already on the list'
-              });
-            }
-          });
-        }else{
-          return res.status(404).send({
-            success: false,
-            message: 'Vehicle not found'
-          });
-        }
-      }else{
-        return res.status(400).send({
-          success: false,
-          message: b
-        });
-      }
-    }else{
-      return res.status(400).send({
-        success: false,
-        message: 'Please fill all column'
-      });
-    }
-  });
-};
 
-const deleteVehicle = (req, res)=>{
-  const {id} = req.params;
-  vehicleModel.getVehicle(id, results=>{
-    if(id!==null && id!==undefined){
-      if(results.length>0){
-        vehicleModel.deleteVehicle(id, result=>{
-          return res.send({
-            success: true,
-            message: 'Deleted',
-            result: `Affected ROows ${result.affectedRows}`
-          });
-        });
+  if(id>0){
+    vehicleModel.getVehicle(id, result=>{
+      if(result.length>0){
+        editData(data, cb, vehicleModel.updateVehicle, res);
       }else{
         return res.status(404).send({
           success: false,
           message: `Vehicle with ID: ${id} not found`
         });
       }
+    });
+  }else{
+    return res.status(400).send({
+      success: false,
+      message: 'ID should be a number greater than 0'
+    });
+  }
+};
+
+const deleteVehicle = (req, res)=>{
+  const {id} = req.params;
+  vehicleModel.getVehicle(id, results=>{
+    if(id!==null && id!==undefined){
+      if(id>0){
+        if(results.length>0){
+          vehicleModel.deleteVehicle(id, result=>{
+            return res.send({
+              success: true,
+              message: 'Deleted',
+              result: `Affected ROows ${result.affectedRows}`
+            });
+          });
+        }else{
+          return res.status(404).send({
+            success: false,
+            message: `Vehicle with ID: ${id} not found`
+          });
+        }
+      }else{
+        return res.status(400).send({
+          success: false,
+          message: 'ID should be a number greater than 0'
+        });
+      }
     }else{
       return res.status(400).send({
         success: false,
-        message: 'Id tidak boleh kosong'
+        message: 'Undefined ID'
       });
     }
   });
 };
 
-module.exports = {getVehicles, getVehicle, addVehicle, updateVehicle, deleteVehicle};
+module.exports = {getVehicles, getVehicle, getCategory, addVehicle, updateVehicle, deleteVehicle};

@@ -14,6 +14,13 @@ exports.getVehicle = (id, cb)=>{
   });
 };
 
+exports.getCategory = (data, cb)=>{
+  db.query(`SELECT * FROM vehicles WHERE name LIKE '%${data.name}%' AND category_id=${data.category_id} LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
+    if (err) throw err;
+    cb(res);
+  });
+};
+
 exports.addVehicle = (data, cb)=>{
   db.query('INSERT INTO vehicles (name, year, cost, available, type, seat, category_id, location) VALUES (?,?,?,?,?,?,?,?)',
     data,(err, res)=>{
@@ -30,7 +37,7 @@ exports.checkVehicle = (isThere, cb)=>{
 };
 
 exports.updateVehicle = (data, cb)=>{
-  db.query('UPDATE vehicles SET name=?, year=?, cost=?, available=?, seat=?, type=?, category_id=?, location=? WHERE id=?', data, (err,res)=>{
+  db.query('UPDATE vehicles SET name=?, year=?, cost=?, available=?, type=?, seat=?, category_id=?, location=? WHERE id=?', data, (err,res)=>{
     if(err) throw err;
     cb(res);
   });
