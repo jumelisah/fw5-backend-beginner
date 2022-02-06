@@ -1,18 +1,34 @@
 const vehicleModel = require('../models/vehicles');
 
 const getVehicles = (req, res)=>{
-  let {name, page, limit} = req.query;
+  let {name, location, cost_min, cost_max, page, limit} = req.query;
   name = name || '';
+  location = location || '';
+  cost_min = parseInt(cost_min) || 0;
+  cost_max = parseInt(cost_max) || 1000000;
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
   const offset = (page-1)*limit;
-  const data = {name, page, limit, offset};
-  vehicleModel.getVehicles(data, results=>{
-    return res.json({
-      success: true,
-      message: 'List of Vehicles',
-      result : results
+  const data = {name, location, cost_min, cost_max, page, limit, offset};
+  if(cost_min>=cost_max){
+    return res.status(400).send({
+      success: false,
+      message: 'cost_min should be less than cost_max'
     });
+  }
+  vehicleModel.getVehicles(data, results=>{
+    if(results.length>0){
+      return res.json({
+        success: true,
+        message: 'List of Vehicles',
+        result : results
+      });
+    }else{
+      return res.status(404).send({
+        success: false,
+        message: 'Vehicle not found'
+      });
+    }
   });
 };
 
@@ -43,24 +59,33 @@ const getVehicle = (req,res)=>{
 
 const getCategory = (req, res)=>{
   const {category_id} = req.params;
-  let {name, page, limit} = req.query;
+  let {name, location, cost_min, cost_max, page, limit} = req.query;
   name = name || '';
+  location = location || '';
+  cost_min = parseInt(cost_min) || 0;
+  cost_max = parseInt(cost_max) || 1000000;
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
   const offset = (page-1)*limit;
-  const data = {name, page, limit, offset, category_id};
+  const data = {name, location, cost_min, cost_max, page, limit, offset, category_id};
+  if(cost_min>=cost_max){
+    return res.status(400).send({
+      success: false,
+      message: 'cost_min should be less than cost_max'
+    });
+  }
   if(category_id>0){
     vehicleModel.getCategory(data, result=>{
       if(result.length>0){
         return res.json({
           success: true,
-          message: `Vehicles by category_id: ${category_id}`,
+          message: 'List of vehicles',
           result: result
         });
       }else{
         return res.status(404).send({
           success: false,
-          message: `Vehicle with category_id: ${category_id} not found`
+          message: 'Vehicle not found'
         });
       }
     });
@@ -111,11 +136,10 @@ const editData = (data, cb, callback, res)=>{
         let isThere = 0;
         if(result.length>0){
           result.forEach(element=>{
-            if(element.name==data[0] && element.id!=data[8]){
+            if(element.id!=data[8]){
               if(element.year==data[1] && element.cost==data[2] && element.type==data[4] && element.location==data[7]){
                 isThere++;
               }
-              console.log(element.id, data[8], isThere);
             }
           });
         }
@@ -146,14 +170,21 @@ const addVehicle = (req,res)=>{
   const {name, year, cost, available, type, seat, category_id, location} = req.body;
   const data = [name, year, cost, available, type, seat, category_id, location];
   let cb = (result)=>{
-    vehicleModel.checkVehicle(name, ress=>{
-      let i = ress.length-1;
-      return res.json({
-        success: true,
-        message: `Vehicle was successfully add. Rows Affected: ${result.affectedRows}`,
-        result: ress[i]
+    if(result.affectedRows>0){
+      vehicleModel.checkVehicle(name, ress=>{
+        let i = ress.length-1;
+        return res.json({
+          success: true,
+          message: 'Vehicle was successfully add.',
+          result: ress[i]
+        });
       });
-    });
+    }else{
+      return res.status(500).send({
+        success: false,
+        message: 'Server error'
+      });
+    }
   };
   editData(data, cb, vehicleModel.addVehicle, res);
 };

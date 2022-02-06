@@ -1,9 +1,10 @@
 const histories = require('express').Router();
 
-const {getHistories, getHistory, addHistories, updateHistory, deleteHistory} = require('../controller/histories');
+const {getHistories, getHistory, getHistoryId, addHistories, updateHistory, deleteHistory} = require('../controller/histories');
 
 histories.get('/', getHistories);
 histories.get('/:id', getHistory);
+histories.get('/vehicles/:vehicle_id', getHistoryId);
 histories.post('/', addHistories);
 histories.patch('/:id', updateHistory);
 histories.patch('/', updateHistory);

@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
 exports.getVehicles = (data, cb)=>{
-  db.query(`SELECT * FROM vehicles WHERE name LIKE '%${data.name}%' LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
+  db.query(`SELECT * FROM vehicles WHERE name LIKE '%${data.name}%' AND location LIKE '%${data.location}%' AND cost>=${data.cost_min} AND cost<=${data.cost_max} LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
     if (err) throw err;
     cb(res);
   });
@@ -15,7 +15,7 @@ exports.getVehicle = (id, cb)=>{
 };
 
 exports.getCategory = (data, cb)=>{
-  db.query(`SELECT * FROM vehicles WHERE name LIKE '%${data.name}%' AND category_id=${data.category_id} LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
+  db.query(`SELECT * FROM vehicles WHERE name LIKE '%${data.name}%' AND location LIKE '%${data.location}%' AND cost>=${data.cost_min} AND cost<=${data.cost_max} AND category_id=${data.category_id} LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
     if (err) throw err;
     cb(res);
   });

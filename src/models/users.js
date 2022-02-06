@@ -7,6 +7,13 @@ exports.getUsers = (data, cb)=>{
   });
 };
 
+exports.getGender = (data, cb)=>{
+  db.query(`SELECT * FROM users WHERE name LIKE '%${data.name}%' AND gender=${data.gender} LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
+    if(err) throw err;
+    cb(res);
+  });
+};
+
 exports.getUser = (id, cb)=>{
   db.query('SELECT * FROM users WHERE id =?', [id], (err, res)=>{
     if(err) throw err;

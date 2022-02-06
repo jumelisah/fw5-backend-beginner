@@ -1,20 +1,45 @@
 const usersProfile = require('../models/users');
 
 const getUsers = (req, res)=>{
-  let {name, page, limit} = req.query;
+  let {name, gender, page, limit} = req.query;
   name = name || '';
+  gender = parseInt(gender) || 0;
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 5;
 
   let offset = (page-1)*limit;
-  const data = {name, page, limit, offset};
-  usersProfile.getUsers(data, results=>{
-    return res.json({
-      success : true,
-      message : 'Users list',
-      result : results
+  const data = {name, gender, page, limit, offset};
+  if(gender>0){
+    if(gender<3){
+      usersProfile.getGender(data, results=>{
+        if(results.length>0){
+          return res.json({
+            success : true,
+            message : 'Users list',
+            result : results
+          });
+        }else{
+          return res.status(404).send({
+            success: false,
+            message: 'Users not found'
+          });
+        }
+      });
+    }else{
+      return res.status(400).send({
+        success: false,
+        message: 'Gender should be 1 for male or 2 for female'
+      });
+    }
+  }else{
+    usersProfile.getUsers(data, result=>{
+      return res.json({
+        success: true,
+        message: 'User list',
+        result: result
+      });
     });
-  });
+  }
 };
 
 const getUser = (req, res)=>{
@@ -133,9 +158,9 @@ const editData = (data, cb, callback, res)=>{
               });
             }
           });
-        }else if(result.length<=1 || result[0].id==data[7]){
+        }else if(result.length<=1 && result[0].id==data[7]){
           usersProfile.checkPhone(data[3], results=>{
-            if(results.length<=1 || results[0].id==data[7]){
+            if(results.length<1 || results[0].id==data[7]){
               callback(data, cb);
             }else{
               console.log(results[0]);
