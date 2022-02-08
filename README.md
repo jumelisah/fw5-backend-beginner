@@ -15,6 +15,10 @@ This is repository of backend beginner task for Fazztrack Bootcamp
 
 ```sh
 git clone https://github.com/jumelisah/fw5-backend-beginner.git cd Backend-Beginner
+```
+```sh
 npm i
+```
+```sh
 node app
 ```
