@@ -25,7 +25,7 @@ This is repository of backend beginner task for Fazztrack Bootcamp
 | ------ | ------ | ------ |
 | GET | /histories | Get data from histories table  |
 | GET | /histories/:id | Get data from histories table with specific ID |
-| GET | /histories/vehicle/vehicles_id | Get data from histories table based on vehicle ID |
+| GET | /histories/vehicles/:vehicle_id | Get data from histories table based on vehicle ID |
 | POST | /histories | Add a new data to vehicles table |
 | PATCH | /histories/:id | Edit data with specific ID in histories table |
 | DELETE | /histories/:id | Delete data with specific ID in histories table |
