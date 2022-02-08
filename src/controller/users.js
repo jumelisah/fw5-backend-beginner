@@ -9,6 +9,17 @@ const getUsers = (req, res)=>{
 
   let offset = (page-1)*limit;
   const data = {name, gender, page, limit, offset};
+  if(limit<0){
+    return res.status(400).send({
+      success: false,
+      message: 'limit should be more than 0'
+    });
+  }if(page<0){
+    return res.status(400).send({
+      success: false,
+      message: 'page should be more than 0'
+    });
+  }
   if(gender>0){
     if(gender<3){
       usersProfile.getGender(data, results=>{
@@ -91,26 +102,6 @@ const isEmail = (email)=>{
   }
 };
 
-const isDate = (date) =>{
-  let yesDate = true;
-  if(date.length==10){
-    for(let a=0;a<date.length;a++){
-      if(a==4 || a==7){
-        if(date[a]!=='-'){
-          yesDate=false;
-        }
-      }else{
-        if(isNaN(parseInt(date[a]))==true){
-          yesDate = false;
-        }
-      }
-    }
-  }else{
-    yesDate = false;
-  }
-  return yesDate;
-};
-
 const isMatch = (data)=>{
   const dataName = ['name', 'email', 'password', 'phone_number', 'gender', 'birthdate', 'address'];
   let theType = ['isNaN', 'email', 'isNaN', 'number', 'number', 'date', 'isNaN'];
@@ -128,8 +119,8 @@ const isMatch = (data)=>{
         dataError.push('Email should be in format : username@email.com');
       }
     }else if(theType[i]=='date'){
-      let a = isDate(data[5]);
-      if(a==false){
+      let a = new Date(data[5]);
+      if(a=='Invalid Date'){
         dataError.push('Birthdate must in format yyyy-mm-dd');
       }
     }else if(theType[i]=='number'){

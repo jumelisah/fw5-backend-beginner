@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
 exports.popularList = (data, cb)=>{
-  db.query(`SELECT v.name AS vehicle_name, v.year AS year, v.cost AS cost, v.location AS location, COUNT(*) AS total_rent FROM histories h JOIN vehicles v ON h.vehicle_id=v.id WHERE v.name LIKE '%${data.vehicle_name}%' AND v.location LIKE '%${data.location}%' GROUP BY vehicle_id ORDER BY COUNT(*) DESC LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
+  db.query(`SELECT v.name AS vehicle_name, v.year AS year, v.cost AS cost, v.location AS location, COUNT(*) AS total_rent FROM histories h JOIN vehicles v ON h.vehicle_id=v.id WHERE v.name LIKE '%${data.vehicle_name}%' AND v.location LIKE '%${data.location}%' AND v.cost>=${data.cost_min} AND v.cost<=${data.cost_max} GROUP BY vehicle_id ORDER BY COUNT(*) DESC LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
     if(err) throw err;
     cb(res);
   });

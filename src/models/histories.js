@@ -29,7 +29,7 @@ exports.getHistVId = (vehicle_id, cb)=>{
 };
 
 exports.addHistories = (data, cb)=>{
-  db.query('INSERT INTO histories (vehicle_id, user_id, prepayment, rent_date, return_date) VALUES(?,?,?,?,?)', data, (err, res)=>{
+  db.query('INSERT INTO histories (vehicle_id, user_id, cost, prepayment, rent_date, return_date) VALUES(?,?,?,?,?,?)', data, (err, res)=>{
     if(err) throw err;
     cb(res);
   });

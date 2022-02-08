@@ -17,11 +17,17 @@ const popularList = (req, res)=>{
     });
   }
   popularRent.popularList(data, result=>{
-    return res.json({
-      success: true,
-      message: 'List of popular vehicle',
-      result: result
-    });
+    if(result.length>0){
+      return res.json({
+        success: true,
+        message: 'List of popular vehicle',
+        result: result
+      });
+    }else{
+      return res.send({
+        success: false,
+        message: 'Data not found'
+      });}
   });
 };
 
@@ -93,6 +99,12 @@ const popularByMonth = (req, res)=>{
       });
     }
   };
+  if(month>12){
+    return res.status(400).send({
+      success: false,
+      message: 'Error: month should between 1-12'
+    });
+  }
   if(cost_min>=cost_max){
     return res.status(400).send({
       success: false,
