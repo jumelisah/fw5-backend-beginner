@@ -22,3 +22,13 @@ npm i
 ```sh
 node app
 ```
+
+## Standard Response and Preview Request By Postman
+
+```
+{
+    success: true,
+    message: 'Successfully add vehicle',
+    result: [object Object]
+}
+```
