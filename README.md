@@ -10,3 +10,11 @@ This is repository of backend beginner task for Fazztrack Bootcamp
 | POST | /vehicles | Add a new data to vehicles table |
 | PATCH | /vehicles/:id | Edit data with specific ID in vehicles table |
 | DELETE | /vehicles/:id | Delete data with specific ID in vehicles table |
+
+## Installation
+
+```sh
+git clone https://github.com/jumelisah/fw5-backend-beginner.git cd Backend-Beginner
+npm i
+node app
+```
