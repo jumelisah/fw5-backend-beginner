@@ -28,7 +28,7 @@ node app
 ```
 {
     success: true,
-    message: 'Successfully add vehicle',
+    message: 'List of vehicles',
     result: [object Object]
 }
 ```
