@@ -1,7 +1,7 @@
-# About
+## About
 This is repository of backend beginner task for Fazztrack Bootcamp
 
-# Vehicles Endpoint
+## Vehicles Endpoint
 | Method | API | Remark |
 | ------ | ------ | ------ |
 | GET | /vehicles | Get data from vehicles table  |
