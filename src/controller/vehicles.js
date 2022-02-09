@@ -119,17 +119,23 @@ const isMatch = (data)=>{
   let dataError = [];
   for(let i = 0; i<data.length; i++){
     if(i!==1){
-      newData.push(parseInt(data[i]));
+      if(data[i]!==null && data[i]!==undefined){
+        newData.push(parseInt(data[i]));
+      }else{
+        newData.push('');
+      }
     }
   }
   for(let j=0; j<newData.length;j++){
-    if(theType[j]=='isNaN'){
-      if(isNaN(newData[j])===false){
-        dataError.push(`${dataName[j]} must a STRING`);
-      }
-    }else{
-      if(isNaN(newData[j])===true){
-        dataError.push(`${dataName[j]} must a NUMBER`);
+    if(newData!==''){
+      if(theType[j]=='isNaN'){
+        if(isNaN(newData[j])===false){
+          dataError.push(`${dataName[j]} must a STRING`);
+        }
+      }else{
+        if(isNaN(newData[j])===true){
+          dataError.push(`${dataName[j]} must a NUMBER`);
+        }
       }
     }
   }
@@ -147,7 +153,7 @@ const addVehicle = (req,res)=>{
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = '';
       if(req.file){
-        image = req.file.path;
+        image = `${APP_URL}/${req.file.path}`;
       }else{
         return res.status(400).send({
           success: false,
@@ -172,9 +178,13 @@ const addVehicle = (req,res)=>{
       vehicleModel.checkVehicle(name, ress=>{
         let itsThere = 0;
         ress.forEach(x=>{
-          if(x.year==year && x.cost==cost && x.type==type && x.location==location){
-            itsThere++;
+          if(x.year==year && x.cost==cost){
+            if(x.type==type && x.location==location){
+              itsThere++;
+            }
           }
+          console.log(x.type, type);
+          console.log(itsThere);
         });
         if(itsThere<1){
           vehicleModel.addVehicle(data, result=>{
@@ -205,40 +215,66 @@ const addVehicle = (req,res)=>{
 };
 
 const updateVehicle = (req, res)=>{
-  const {id} = req.params;
-  const {name, year, cost, qty, type, seat, category_id, location} = req.body;
-  let gb = req.file;
-  let image = '';
-  if(gb!==null && gb!==undefined){
-    image = gb.path;
-    image = `${APP_URL}/${image}`;
-  }
-  const data = [name, image, year, cost, qty, type, seat, category_id, location, id];
-  const dataName = ['name', 'image', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
-
-  vehicleModel.getVehicle(id, result=>{
-    if(result.length>0){
-      for(let i=0; i<dataName.length;i++){
-        if(data[i]==null || data[i]==undefined || data[i]==''){
-          data[i]=result[0][dataName[i]];
-        }
-      }
-      console.log(data);
-      vehicleModel.updateVehicle(data, results=>{
-        if(results.affectedRows>0){
-          vehicleModel.getVehicle(id, ress=>{
-            return res.json({
-              success: true,
-              message: 'Successfully update vehicle',
-              result: ress[0]
-            });
-          });
-        }
+  upload(req, res, err=>{
+    if(err){
+      return res.json({
+        success: false,
+        message: err.message
       });
     }else{
-      return res.status(404).send({
-        success: false,
-        message: `Vehicle with ID: ${id} not found`
+      const {id} = req.params;
+      const {name, year, cost, qty, type, seat, category_id, location} = req.body;
+      let image = '';
+      if(req.file){
+        image = `${APP_URL}/${req.file.path}`;
+      }
+      const data = [name, image, year, cost, qty, type, seat, category_id, location, id];
+      const dataName = ['name', 'image', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
+    
+      vehicleModel.getVehicle(id, result=>{
+        console.log(data);
+        console.log(result[0]);
+        if(result.length>0){
+          for(let i=0; i<dataName.length;i++){
+            if(data[i]==null || data[i]==undefined || data[i]==''){
+              data[i]=result[0][dataName[i]];
+            }
+          }
+          console.log(data);
+          vehicleModel.checkVehicle(name, ress=>{
+            let itsThere = 0;
+            ress.forEach(x=>{
+              if(x.id!=id && x.year==year && x.cost==cost){
+                if(x.type==type && x.location==location){
+                  itsThere++;
+                }
+              }
+            });
+            if(itsThere<1){
+              vehicleModel.updateVehicle(data, results=>{
+                if(results.affectedRows>0){
+                  vehicleModel.getVehicle(id, ress=>{
+                    return res.json({
+                      success: true,
+                      message: 'Successfully update vehicle',
+                      result: ress[0]
+                    });
+                  });
+                }
+              });
+            }else{
+              return res.status(400).send({
+                success: false,
+                message: 'Vehicle already on the list'
+              });
+            }
+          });
+        }else{
+          return res.status(404).send({
+            success: false,
+            message: `Vehicle with ID: ${id} not found`
+          });
+        }
       });
     }
   });
