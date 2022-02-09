@@ -56,4 +56,4 @@ node app
 
 # Author
 
-[@jumelisah](https://github.com/jumelisah)
+[Jumelisah](https://github.com/jumelisah)
