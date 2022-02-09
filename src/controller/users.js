@@ -1,4 +1,6 @@
 const usersProfile = require('../models/users');
+const {APP_URL} = process.env;
+const upload = require('../helpers/upload').single('image');
 
 const getUsers = (req, res)=>{
   let {name, gender, page, limit} = req.query;
@@ -183,18 +185,50 @@ const editData = (data, cb, callback, res)=>{
 };
 
 const addUser = (req, res)=>{
-  const {name, email, password, phone_number, gender, birthdate, address} = req.body;
-  const data = [name, email, password, phone_number, gender, birthdate, address];
-  const cb = (result)=>{
-    usersProfile.checkEmail(email, ress=>{
+  upload(req, res, err=>{
+    if(err){
       return res.json({
-        success: true,
-        message: `Successfully add user. Rows affected: ${result.affectedRows}`,
-        result: ress[0]
+        success: false,
+        message: err.message
       });
-    });
-  };
-  editData(data, cb, usersProfile.addUser, res);
+    }else{
+      const {name, email, phone_number} = req.body;
+      let image = '';
+      if(req.file){
+        image = `${APP_URL}/${req.file.path}`;
+      }else{
+        image = 'http://localhost:8000/uploads\\default-avatar.jpg';
+      }
+      const data = {name, image, email, phone_number};
+      usersProfile.checkEmail(email, resultEmail=>{
+        if(resultEmail.length<1){
+          usersProfile.checkPhone(phone_number, resPhone=>{
+            if(resPhone<1){
+              usersProfile.addUser(data, result=>{
+                usersProfile.getUser(result.insertId, resultId=>{
+                  return res.json({
+                    success: true,
+                    message: 'Success',
+                    result: resultId[0]
+                  });
+                });
+              });
+            }else{
+              return res.status(400).send({
+                success: false,
+                message: 'Phone number has been used.'
+              })
+            }
+          })
+        }else{
+          return res.status(400).send({
+            success: false,
+            message: 'Email has been used'
+          });
+        }
+      });
+    }
+  });
 };
 
 const updateUser = (req, res)=>{

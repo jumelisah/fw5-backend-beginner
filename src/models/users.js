@@ -43,7 +43,7 @@ exports.checkPhone = (phone, cb)=>{
 };
 
 exports.addUser = (data, cb)=>{
-  db.query('INSERT INTO users (name, email, password, phone_number, gender, birthdate, address) VALUES(?,?,?,?,?,?,?)', data, (err, res)=>{
+  db.query('INSERT INTO users (name, image, email, phone_number) VALUES(?,?,?,?)', [data.name, data.image, data.email, data.phone_number], (err, res)=>{
     if(err) throw err;
     cb(res);
   });
