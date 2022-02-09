@@ -22,7 +22,7 @@ exports.getCategory = (data, cb)=>{
 };
 
 exports.addVehicle = (data, cb)=>{
-  db.query('INSERT INTO vehicles (name, year, cost, available, type, seat, category_id, location) VALUES (?,?,?,?,?,?,?,?)',
+  db.query('INSERT INTO vehicles (name, image, year, cost, qty, type, seat, category_id, location) VALUES (?,?,?,?,?,?,?,?,?)',
     data,(err, res)=>{
       if(err) throw err;
       cb(res);
@@ -37,7 +37,7 @@ exports.checkVehicle = (isThere, cb)=>{
 };
 
 exports.updateVehicle = (data, cb)=>{
-  db.query('UPDATE vehicles SET name=?, year=?, cost=?, available=?, type=?, seat=?, category_id=?, location=? WHERE id=?', data, (err,res)=>{
+  db.query('UPDATE vehicles SET name=?, image=?, year=?, cost=?, qty=?, type=?, seat=?, category_id=?, location=? WHERE id=?', data, (err,res)=>{
     if(err) throw err;
     cb(res);
   });
