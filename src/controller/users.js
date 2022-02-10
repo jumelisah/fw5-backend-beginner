@@ -1,4 +1,3 @@
-const response = require('../helpers/response');
 const usersProfile = require('../models/users');
 const {APP_URL} = process.env;
 const upload = require('../helpers/upload').single('image');
@@ -158,27 +157,114 @@ const updateUser = (req, res)=>{
         message: 'Undefined user ID.'
       });
     }
-    const updateResponse = usersProfile.updateUser(data, id, results=>{
-      if(results.affectedRows>0){
-        usersProfile.getUser(id, resultUser=>{
-          return response(res, 'Successfully update user', resultUser[0]);
-        });
-      }else{
-        return response(res, 'Server error: Fail to update data.', null, 500);
-      }
-    });
     if(id>0){
       usersProfile.getUser(id, resultId=>{
         if(resultId.length>0){
-          if(data.email && data.email!=resultId[0].email){
-            return updateResponse;
+          if(data.email && data.email!==resultId[0].email){
+            usersProfile.checkEmail(data.email, resultEmail=>{
+              if(resultEmail.length>0){
+                if(data.phone_number && data.phone_number!==resultId[0].phone_number){
+                  usersProfile.checkPhone(data.phone_number, resultPhone=>{
+                    if(resultPhone<1){
+                      usersProfile.updateUser(data, id, results=>{
+                        if(results.affectedRows>0){
+                          usersProfile.getUser(id, resultUser=>{
+                            return res.json({
+                              success: true,
+                              message: 'success',
+                              result: resultUser[0]
+                            });
+                          });
+                        }else{
+                          return res.status(500).send({
+                            success: false,
+                            message: 'Server error: Fail to update data.'
+                          });
+                        }
+                      });
+                    }else{
+                      return res.status(400).send({
+                        success: false,
+                        message: 'Phone number has been used.'
+                      });
+                    }
+                  });
+                }else{
+                  usersProfile.updateUser(data, id, results=>{
+                    if(results.affectedRows>0){
+                      usersProfile.getUser(id, resultUser=>{
+                        return res.json({
+                          success: true,
+                          message: 'success',
+                          result: resultUser[0]
+                        });
+                      });
+                    }else{
+                      return res.status(500).send({
+                        success: false,
+                        message: 'Server error: Fail to update data.'
+                      });
+                    }
+                  });
+                }
+              }
+            });
+          }else if(data.phone_number && data.phone_number!==resultId[0].phone_number){
+            usersProfile.checkPhone(data.phone_number, resultPhone=>{
+              if(resultPhone<1){
+                usersProfile.updateUser(data, id, results=>{
+                  if(results.affectedRows>0){
+                    usersProfile.getUser(id, resultUser=>{
+                      return res.json({
+                        success: true,
+                        message: 'success',
+                        result: resultUser[0]
+                      });
+                    });
+                  }else{
+                    return res.status(500).send({
+                      success: false,
+                      message: 'Server error: Fail to update data.'
+                    });
+                  }
+                });
+              }else{
+                return res.status(400).send({
+                  success: false,
+                  message: 'Phone number has been used.'
+                });
+              }
+            });
+          }else{
+            usersProfile.updateUser(data, id, results=>{
+              if(results.affectedRows>0){
+                usersProfile.getUser(id, resultUser=>{
+                  return res.json({
+                    success: true,
+                    message: 'success',
+                    result: resultUser[0]
+                  });
+                });
+              }else{
+                return res.status(500).send({
+                  success: false,
+                  message: 'Server error: Fail to update data.'
+                });
+              }
+            });
           }
         }else{
-          return response(res, `User with ID: ${id} not found.`, null, 404);
+          return res.status(404).send({
+            success: false,
+            message: `User with ID: ${id} not found.`
+          });
         }
       });
     }else{
-      return response(res, 'User ID should be a number greater than 0.', null, 400);
+      return res.status(400).send({
+        success: false,
+        message: 'User ID should be a number greater than 0.'
+      });
     }
   });
 };
@@ -186,25 +272,33 @@ const updateUser = (req, res)=>{
 const deleteUser = (req,res)=>{
   const {id} = req.params;
   if(id==null || id==undefined){
-    return response(res, 'Undefined ID', null, 400);
+    return res.status(400).send({
+      success: false,
+      message: 'Undefined ID'
+    });
   }
   if(id>0){
     usersProfile.getUser(id, results=>{
       if(results.length>0){
         usersProfile.deleteUser(id, result=>{
-          if(result.affectedRows>0){
-            return response(res, 'User was deleted', results[0]);
-          }else{
-            return response(res, 'Server Error: Cannot delete user', null, 500);
-          }
+          return res.json({
+            success: true,
+            message: `User with ID: ${id} was deleted`,
+            result: `Rows affected: ${result.affectedRows}`
+          });
         });
       }else{
-        return response(res, `User with ID: ${id} not found`, null, 404);
+        return res.status(404).send({
+          success: false,
+          message: `User with ID: ${id} not found`
+        });
       }
     });
   }else{
-    return response(res, 'ID should be a number greater than 0', null, 400);
-  }
+    return res.status(400).send({
+      success: false,
+      message: 'ID should be a number greater than 0'
+    });}
 };
 
 module.exports = {getUsers, getUser, addUser, updateUser, deleteUser};
