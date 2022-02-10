@@ -7,6 +7,13 @@ exports.getVehicles = (data, cb)=>{
   });
 };
 
+exports.getTotal = (data, cb)=>{
+  db.query(`SELECT COUNT(*) AS total FROM vehicles WHERE name LIKE '%${data.name}%' AND location LIKE '%${data.location}%' AND cost>=${data.cost_min} AND cost<=${data.cost_max}`, (err,res)=>{
+    if (err) throw err;
+    cb(res);
+  });
+};
+
 exports.getVehicle = (id, cb)=>{
   db.query('SELECT * FROM vehicles WHERE id=?',[id], (err,res)=>{
     if (err) throw err;

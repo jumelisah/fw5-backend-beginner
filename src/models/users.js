@@ -49,8 +49,8 @@ exports.addUser = (data, cb)=>{
   });
 };
 
-exports.updateUser = (data, cb)=>{
-  db.query('UPDATE users SET name=?, email=?, password=?, phone_number=?, gender=?, birthdate=?, address=? WHERE id=?', data, (err,res)=>{
+exports.updateUser = (data, id, cb)=>{
+  db.query('UPDATE users SET ? WHERE id=?', [data, id], (err,res)=>{
     if(err) throw err;
     cb(res);
   });
