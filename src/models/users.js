@@ -21,13 +21,6 @@ exports.getUser = (id, cb)=>{
   });
 };
 
-exports.checkContact = (contact, cb)=>{
-  db.query('SELECT * FROM users WHERE email=? OR phone_number=?', contact, (err, res)=>{
-    if(err) throw err;
-    cb(res);
-  });
-};
-
 exports.checkEmail = (email, cb)=>{
   db.query('SELECT * FROM users WHERE email=?', [email], (err, res)=>{
     if(err) throw err;
@@ -42,8 +35,22 @@ exports.checkPhone = (phone, cb)=>{
   });
 };
 
+exports.checkUsername = (username, cb)=>{
+  db.query('SELECT * FROM users WHERE username=?', [username], (err,res)=>{
+    if(err) throw err;
+    cb(res);
+  });
+};
+
+exports.checkContact = (data, cb)=>{
+  db.query(`SELECT * FROM users WHERE email='${data.email} OR phone_number='${data.phone_number} AND id!=${data.id}`, (err, res)=>{
+    if(err) throw err;
+    cb(res);
+  });
+};
+
 exports.addUser = (data, cb)=>{
-  db.query('INSERT INTO users (name, image, email, phone_number) VALUES(?,?,?,?)', [data.name, data.image, data.email, data.phone_number], (err, res)=>{
+  db.query('INSERT INTO users (name, username, email, password, phone_number, gender, birthdate,address) VALUES(?,?,?,?,?,?,?,?)', [data.name, data.username, data.email, data.password, data.phone_number, data.gender, data.birthdate, data.address], (err, res)=>{
     if(err) throw err;
     cb(res);
   });

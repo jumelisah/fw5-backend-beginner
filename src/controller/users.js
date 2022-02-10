@@ -1,4 +1,5 @@
 const usersProfile = require('../models/users');
+const response = require('../helpers/response');
 const {APP_URL} = process.env;
 const upload = require('../helpers/upload').single('image');
 
@@ -89,39 +90,57 @@ const addUser = (req, res)=>{
         message: err.message
       });
     }else{
-      const {name, email, phone_number} = req.body;
+      const {name, username, email, password, phone_number, gender, birthdate, address} = req.body;
       let image = '';
       if(req.file){
         image = `${APP_URL}/${req.file.path}`;
       }else{
         image = 'http://localhost:8000/uploads\\default-avatar.jpg';
       }
-      const data = {name, image, email, phone_number};
+      const data = {name, image, username, email, password, phone_number, gender, birthdate, address};
+      const dataName = ['name', 'username', 'email', 'password', 'phone_number', 'gender', 'birthdate', 'address'];
+      let notThere = 0;
+      dataName.forEach(x=>{
+        if(!data[x]){
+          notThere++;
+        }
+      });
+      if(notThere>0){
+        return response(res, 'Please fill all the fields', null, 400);
+      }
       usersProfile.checkEmail(email, resultEmail=>{
         if(resultEmail.length<1){
           usersProfile.checkPhone(phone_number, resPhone=>{
             if(resPhone<1){
-              usersProfile.addUser(data, result=>{
-                usersProfile.getUser(result.insertId, resultId=>{
-                  return res.json({
-                    success: true,
-                    message: 'Success',
-                    result: resultId[0]
+              usersProfile.checkUsername(username, resultUname=>{
+                if(resultUname.length<1){
+                  usersProfile.addUser(data, result=>{
+                    if(result.affectedRows>0){
+                      usersProfile.getUser(result.insertId, resultId=>{
+                        if(resultId.length>0){
+                          return res.json({
+                            success: true,
+                            message: 'Success',
+                            result: resultId[0]
+                          });
+                        }else{
+                          return response(res, 'Error: Can\'t get data', null, 500);
+                        }
+                      });
+                    }else{
+                      return response(res, 'Error: Can\'t add user', null, 500);
+                    }
                   });
-                });
+                }else{
+                  return response(res, 'Username not available', null, 400);
+                }
               });
             }else{
-              return res.status(400).send({
-                success: false,
-                message: 'Phone number has been used.'
-              });
+              return response(res, 'Phone number has been used.', null, 400);
             }
           });
         }else{
-          return res.status(400).send({
-            success: false,
-            message: 'Email has been used'
-          });
+          return response(res, 'Email has been used.', null, 400);
         }
       });
     }
@@ -158,113 +177,16 @@ const updateUser = (req, res)=>{
       });
     }
     if(id>0){
-      usersProfile.getUser(id, resultId=>{
-        if(resultId.length>0){
-          if(data.email && data.email!==resultId[0].email){
-            usersProfile.checkEmail(data.email, resultEmail=>{
-              if(resultEmail.length>0){
-                if(data.phone_number && data.phone_number!==resultId[0].phone_number){
-                  usersProfile.checkPhone(data.phone_number, resultPhone=>{
-                    if(resultPhone<1){
-                      usersProfile.updateUser(data, id, results=>{
-                        if(results.affectedRows>0){
-                          usersProfile.getUser(id, resultUser=>{
-                            return res.json({
-                              success: true,
-                              message: 'success',
-                              result: resultUser[0]
-                            });
-                          });
-                        }else{
-                          return res.status(500).send({
-                            success: false,
-                            message: 'Server error: Fail to update data.'
-                          });
-                        }
-                      });
-                    }else{
-                      return res.status(400).send({
-                        success: false,
-                        message: 'Phone number has been used.'
-                      });
-                    }
-                  });
-                }else{
-                  usersProfile.updateUser(data, id, results=>{
-                    if(results.affectedRows>0){
-                      usersProfile.getUser(id, resultUser=>{
-                        return res.json({
-                          success: true,
-                          message: 'success',
-                          result: resultUser[0]
-                        });
-                      });
-                    }else{
-                      return res.status(500).send({
-                        success: false,
-                        message: 'Server error: Fail to update data.'
-                      });
-                    }
-                  });
-                }
-              }
-            });
-          }else if(data.phone_number && data.phone_number!==resultId[0].phone_number){
-            usersProfile.checkPhone(data.phone_number, resultPhone=>{
-              if(resultPhone<1){
-                usersProfile.updateUser(data, id, results=>{
-                  if(results.affectedRows>0){
-                    usersProfile.getUser(id, resultUser=>{
-                      return res.json({
-                        success: true,
-                        message: 'success',
-                        result: resultUser[0]
-                      });
-                    });
-                  }else{
-                    return res.status(500).send({
-                      success: false,
-                      message: 'Server error: Fail to update data.'
-                    });
-                  }
-                });
-              }else{
-                return res.status(400).send({
-                  success: false,
-                  message: 'Phone number has been used.'
-                });
-              }
-            });
-          }else{
-            usersProfile.updateUser(data, id, results=>{
-              if(results.affectedRows>0){
-                usersProfile.getUser(id, resultUser=>{
-                  return res.json({
-                    success: true,
-                    message: 'success',
-                    result: resultUser[0]
-                  });
-                });
-              }else{
-                return res.status(500).send({
-                  success: false,
-                  message: 'Server error: Fail to update data.'
-                });
-              }
-            });
-          }
+      usersProfile.getUser(id, result=>{
+        if(result.length>0){
+          if(data.email)
+          return response(res, 'success', result[0]);
         }else{
-          return res.status(404).send({
-            success: false,
-            message: `User with ID: ${id} not found.`
-          });
+          return response(res, 'User not found', null, 404);
         }
       });
     }else{
-      return res.status(400).send({
-        success: false,
-        message: 'User ID should be a number greater than 0.'
-      });
+      return response(res, 'ID should be a number greater than 0', null, 400);
     }
   });
 };
