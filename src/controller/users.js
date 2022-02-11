@@ -180,7 +180,7 @@ const updateUser = (req, res)=>{
       usersProfile.getUser(id, result=>{
         if(result.length>0){
           if(data.email)
-          return response(res, 'success', result[0]);
+            return response(res, 'success', result[0]);
         }else{
           return response(res, 'User not found', null, 404);
         }
