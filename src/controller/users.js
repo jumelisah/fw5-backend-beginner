@@ -179,8 +179,10 @@ const updateUser = (req, res)=>{
     if(id>0){
       usersProfile.getUser(id, result=>{
         if(result.length>0){
-          if(data.email)
-            return response(res, 'success', result[0]);
+          if(data.email){
+            usersProfile.checkEmail(data.email, resultEmail=>{})
+          }
+          return response(res, 'success', result[0]);
         }else{
           return response(res, 'User not found', null, 404);
         }
