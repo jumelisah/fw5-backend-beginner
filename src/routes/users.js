@@ -1,8 +1,9 @@
 const users = require('express').Router();
+const {getUser, addUser, updateUser, deleteUser} = require('../controller/users');
+const {getUsers} = require('../controller/userasync');
+const { verifyUser } = require('../helpers/auth');
 
-const {getUsers, getUser, addUser, updateUser, deleteUser} = require('../controller/users');
-
-users.get('/', getUsers);
+users.get('/', verifyUser, getUsers);
 users.get('/:id', getUser);
 users.post('/', addUser);
 users.patch('/', updateUser);

@@ -1,5 +1,19 @@
 const db = require('../helpers/db');
 
+exports.getUsers = ()=>new Promise((resolve, reject)=>{
+  db.query('SELECT * FROM users', (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
+exports.getUser = (id)=>new Promise((resolve, reject)=>{
+  db.query('SELECT * FROM users WHERE id=?', [id], (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
 exports.getUserId = (id)=>{
   return new Promise((resolve, reject)=>{
     db.query(`SELECT * FROM users WHERE id=${id}`, (err, res)=>{

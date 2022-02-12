@@ -180,7 +180,7 @@ const updateUser = (req, res)=>{
       usersProfile.getUser(id, result=>{
         if(result.length>0){
           if(data.email){
-            usersProfile.checkEmail(data.email, resultEmail=>{})
+            usersProfile.checkEmail(data.email, resultEmail=>{});
           }
           return response(res, 'success', result[0]);
         }else{
