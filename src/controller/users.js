@@ -1,5 +1,6 @@
 const usersProfile = require('../models/users');
 const bcrypt = require('bcrypt');
+const {APP_URL} = process.env;
 const response = require('../helpers/response');
 const isEmail = require('../helpers/emailvalidator');
 const isNull = require('../helpers/isNull');
@@ -10,7 +11,7 @@ exports.getUsers = async(req, res)=>{
   if(req.user.role==='admin'){
     const result = await usersProfile.getUsers();
     if(result.length>0){
-      return response(res, 'List of users', result[0]);
+      return response(res, 'List of users', result);
     }else{
       return response(res, 'No data found', null);
     }
@@ -83,72 +84,25 @@ exports.createUser = async(req, res)=>{
 
 exports.updateUser = async(req, res)=>{
   const {id} = req.params;
+  let image = '';
   const data = {};
-  const dataName = ['name', 'username', 'email', 'password', 'role', 'phone_number', 'gender', 'birthdate', 'address'];
-  dataName.forEach(x=>{
-    if(req.body[x]){
-      data[x] = req.body[x];
-    }
-  });
+  if(req.file){
+    image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
+    data.image = image;
+  }
+  if(id==null || id==undefined || id==''){
+    return response(res, 'Undefined ID', null, 400);
+  }
+  if(id<=0){
+    return response(res, 'ID should be a number greater than 0');
+  }
   if(req.body.role){
     if(req.user.role!=='admin'){
       return response(res, 'You are not allow to add user role', null, 403);
-    }
-  }
-  if(req.user.id==id){
-    if(id==null || id==undefined || id==''){
-      return response(res, 'Undefined ID', null, 400);
-    }
-    if(id>0){
+    }else{
+      data.role = req.body.role;
       const resultId = await usersProfile.getUser(id);
       if(resultId.length>0){
-        const checkType = checkDataType(data, ['phone_number'], ['name']);
-        if(checkType.length>0){
-          return response(res, checkType, null, 400);
-        }
-        if(data.password){
-          if(data.password.length>=6){
-            const salt = await bcrypt.genSalt(10);
-            const password = await bcrypt.hash(data.password, salt);
-            data.password = password;
-          }else{
-            return response(res, 'Password should contain 6 characters and more', null, 400);
-          }
-        }
-      
-        if(data.email){
-          const itsEmail = isEmail(data.email);
-          if(!itsEmail){
-            return response(res, 'Wrong email format!', null, 400);
-          }
-          const checkEmail = await usersProfile.getEmail(data.email);
-          if(checkEmail.length>0 && id!=checkEmail[0].id){
-            return response(res, 'Email has been used', null, 400);
-          }
-        }
-        if(data.phone_number){
-          if(data.phone_number.length<10 || data.phone_number.length>13){
-            return response(res, 'Phone number length should be between 10-13 numbers', null, 400);
-          }
-          const checkPhone = await usersProfile.getPhone(data.phone_number);
-          if(checkPhone.length>0 && id!=checkPhone[0].id){
-            return response(res, 'Phone number has been used', null, 400);
-          }
-        }
-        if(data.username){
-          const checkUname = await usersProfile.getUserUname(data.username);
-          if(checkUname.length>0 && id!=checkUname[0].id){
-            return response(res, 'Username not available', null, 400);
-          }
-        }
-        if(data.birthdate){
-          const itsDate = isDate(data.birthdate);
-          if(itsDate!=='Invalid Date'){
-            data.birthdate = itsDate;
-          }else{
-            return response(res, 'Invalid date format', null, 400);
-          }
-        }
         const resultUpdate = await usersProfile.updateUser(data, id);
         if(resultUpdate.affectedRows>0){
           const resultUpdateUser = await usersProfile.getUser(id);
@@ -161,10 +115,84 @@ exports.updateUser = async(req, res)=>{
           return response(res, 'Error: Can\'t update user', null, 500);
         }
       }else{
-        return response(res, 'User not found', null, 400);
+        return response(res, 'User not found', null, 404);
+      }
+    }
+  }
+  
+
+  if(req.user.id==id){
+    const dataName = ['name', 'username', 'email', 'password', 'role', 'phone_number', 'gender', 'birthdate', 'address'];
+
+    const resultId = await usersProfile.getUser(id);
+    if(resultId.length>0){
+      dataName.forEach(x=>{
+        if(req.body[x]){
+          data[x] = req.body[x];
+        }else{
+          data[x] = resultId[0][x];
+        }
+      });
+      const checkType = checkDataType(data, ['phone_number'], ['name']);
+      if(checkType.length>0){
+        return response(res, checkType, null, 400);
+      }
+      if(data.password){
+        if(data.password.length>=6){
+          const salt = await bcrypt.genSalt(10);
+          const password = await bcrypt.hash(data.password, salt);
+          data.password = password;
+        }else{
+          return response(res, 'Password should contain 6 characters and more', null, 400);
+        }
+      }
+    
+      if(data.email){
+        const itsEmail = isEmail(data.email);
+        if(!itsEmail){
+          return response(res, 'Wrong email format!', null, 400);
+        }
+        const checkEmail = await usersProfile.getEmail(data.email);
+        if(checkEmail.length>0 && id!=checkEmail[0].id){
+          return response(res, 'Email has been used', null, 400);
+        }
+      }
+      if(data.phone_number){
+        if(data.phone_number.length<10 || data.phone_number.length>13){
+          return response(res, 'Phone number length should be between 10-13 numbers', null, 400);
+        }
+        const checkPhone = await usersProfile.getPhone(data.phone_number);
+        if(checkPhone.length>0 && id!=checkPhone[0].id){
+          return response(res, 'Phone number has been used', null, 400);
+        }
+      }
+      if(data.username){
+        const checkUname = await usersProfile.getUserUname(data.username);
+        if(checkUname.length>0 && id!=checkUname[0].id){
+          return response(res, 'Username not available', null, 400);
+        }
+      }
+      if(data.birthdate){
+        const itsDate = isDate(data.birthdate);
+        if(itsDate!=='Invalid Date'){
+          data.birthdate = itsDate;
+        }else{
+          return response(res, 'Invalid date format', null, 400);
+        }
+      }
+      const resultUpdate = await usersProfile.updateUser(data, id);
+      if(resultUpdate.affectedRows>0){
+        const resultUpdateUser = await usersProfile.getUser(id);
+        if(resultUpdateUser.length===1){
+          return response(res, 'Successfully update user data', resultUpdateUser[0]);
+        }else{
+          return response(res, 'Error: Can\'t get updated data', null, 500);
+        }
+      }else{
+        return response(res, 'Error: Can\'t update user', null, 500);
       }
     }else{
-      return response(res, 'ID should be a number greater than 0');
+      return response(res, 'User not found', null, 400);
     }
   }else{
     return response(res, 'Unmatch ID', null, 403);

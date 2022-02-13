@@ -59,8 +59,10 @@ exports.getVehicle = async(req, res)=>{
 
 exports.addVehicle = async(req, res)=>{
   if(req.user.role=='admin'){
+    const image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
     const {name, year, cost, qty, type, seat, category_id, location} = req.body;
-    const data = {name, year, cost, qty, type, seat, category_id, location};
+    const data = {name, image, year, cost, qty, type, seat, category_id, location};
+    console.log(data.image);
     const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
     const dataString = ['name', 'location'];
     const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
@@ -96,14 +98,14 @@ exports.updateVehicle = async(req, res)=>{
   const {id} = req.params;
   if(req.user.role=='admin'){
     const data = {};
-    const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
+    let image ='';
+    if(req.file){
+      image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
+      data.image = image;
+    }
+    const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
     const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
     const dataString = ['name', 'location'];
-    dataName.forEach(x=>{
-      if(req.body[x]){
-        data[x] = req.body[x];
-      }
-    });
     if(id==null || id==undefined || id==''){
       return response(res, 'Please input the ID first!', null, 400);
     }
@@ -118,6 +120,16 @@ exports.updateVehicle = async(req, res)=>{
     if(resultId.length<1){
       return response(res, `Vehicle with ID=${id} not found`, null, 404);
     }
+    dataName.forEach(x=>{
+      if(req.body[x]){
+        data[x] = req.body[x];
+      }else{
+        data[x] = resultId[0][x];
+      }
+      if(image == ''){
+        data.image = resultId[0].image;
+      }
+    });
     const checkVehicle = await vehicleModel.getVehicleName(data);
     if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
       return response(res, 'Vehicle already on the list', null, 400);

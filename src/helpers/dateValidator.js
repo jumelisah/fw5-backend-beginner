@@ -36,4 +36,22 @@ const isDate = (date)=>{
   }
 };
 
-module.exports = isDate;
+const changeDate = (date)=>{
+  const expired = moment(date).add(2, 'm').toDate();
+  let b = expired.getDate();
+  let a = expired.getMonth()+1;
+  let c = expired.getHours();
+  let d = expired.getMinutes();
+  let e = expired.getSeconds();
+  console.log(e.length);
+  let dates = [expired.getFullYear(), a,b,c,d,e];
+  for(let i =1; i<dates.length;i++){
+    if(parseInt(dates[i])<10){
+      dates[i]='0'+dates[i];
+    }
+  }
+  let x = dates.join('');
+  return x;
+};
+
+module.exports = {isDate, changeDate};

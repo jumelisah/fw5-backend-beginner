@@ -1,8 +1,8 @@
 const auth = require('express').Router();
 
-const {login, verify} = require('../controller/auth');
+const {login, forgotPassword} = require('../controller/auth');
 
 auth.post('/login', login);
-auth.post('/verify', verify);
+auth.post('/forgot-password', forgotPassword);
 
 module.exports = auth;

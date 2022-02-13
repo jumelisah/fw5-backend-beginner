@@ -3,6 +3,7 @@ const isNull = (data, dataName)=>{
   dataName.forEach(x=>{
     if(data[x]==null || data[x]==undefined || data[x]==''){
       dataNull++;
+      console.log(x);
     }
   });
   if(dataNull>0){
