@@ -63,7 +63,8 @@ exports.addVehicle = async(req, res)=>{
     const data = {name, year, cost, qty, type, seat, category_id, location};
     const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
     const dataString = ['name', 'location'];
-    const itsNull = isNull(data, dataNumber, dataString);
+    const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
+    const itsNull = isNull(data, dataName);
     const checkType = checkDataType(data, dataNumber, dataString);
     if(itsNull){
       return response(res, 'Please fill in all the fields.', null, 400);
@@ -87,7 +88,7 @@ exports.addVehicle = async(req, res)=>{
       return response(res, 'Error: Can\'t add vehicle', null, 500);
     }
   }else{
-    return response(res, 'You are unable to add data', null, 403);
+    return response(res, 'You are unable to do this action', null, 403);
   }
 };
 

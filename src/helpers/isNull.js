@@ -1,11 +1,6 @@
-const isNull = (data, dataNumber, dataString)=>{
+const isNull = (data, dataName)=>{
   let dataNull = 0;
-  dataNumber.forEach(x=>{
-    if(data[x]==null || data[x]==undefined || data[x]==''){
-      dataNull++;
-    }
-  });
-  dataString.forEach(x=>{
+  dataName.forEach(x=>{
     if(data[x]==null || data[x]==undefined || data[x]==''){
       dataNull++;
     }
