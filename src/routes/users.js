@@ -5,7 +5,7 @@ const upload = require('../helpers/upload');
 
 users.get('/', verifyUser, getUsers);
 users.get('/:id', verifyUser, getUser);
-users.post('/', createUser);
+users.post('/', upload.single('image'), createUser);
 users.patch('/', verifyUser, updateUser);
 users.patch('/:id', verifyUser, upload.single('image'), updateUser);
 users.delete('/:id', verifyUser, deleteUser);

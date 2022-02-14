@@ -2,6 +2,7 @@ const checkDataType = require('../helpers/dataType');
 const isNull = require('../helpers/isNull');
 const response = require('../helpers/response');
 const vehicleModel = require('../models/vehicles');
+const upload = require('../helpers/upload').single('image');
 const {APP_URL} = process.env;
 
 exports.getVehicles = async(req, res)=>{
@@ -57,41 +58,50 @@ exports.getVehicle = async(req, res)=>{
   }
 };
 
-exports.addVehicle = async(req, res)=>{
-  if(req.user.role=='admin'){
-    const image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
-    const {name, year, cost, qty, type, seat, category_id, location} = req.body;
-    const data = {name, image, year, cost, qty, type, seat, category_id, location};
-    console.log(data.image);
-    const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
-    const dataString = ['name', 'location'];
-    const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
-    const itsNull = isNull(data, dataName);
-    const checkType = checkDataType(data, dataNumber, dataString);
-    if(itsNull){
-      return response(res, 'Please fill in all the fields.', null, 400);
+exports.addVehicle = (req, res)=>{
+  upload(req, res, async(err)=>{
+    if(err){
+      return response(res, err.message, null, 400);
     }
-    if(checkType.length>0){
-      return response(res, checkType, null, 400);
-    }
-    const checkVehicle = await vehicleModel.getVehicleName(data);
-    if(checkVehicle.length>0){
-      return response(res, 'Vehicle already on the list', null, 400);
-    }
-    const addResult = await vehicleModel.addVehicle(data);
-    if(addResult.affectedRows>0){
-      const resultId = await vehicleModel.getVehicle(addResult.insertId);
-      if(resultId.length===1){
-        return response(res, 'Successfully add vehicle', resultId[0]);
+    if(req.user.role=='admin'){
+      const {name, year, cost, qty, type, seat, category_id, location} = req.body;
+      let image = null;
+      const data = {name, image, year, cost, qty, type, seat, category_id, location};
+      if(req.file){
+        image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
+        data.image = image;
+      }
+      console.log(data.image);
+      const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
+      const dataString = ['name', 'location'];
+      const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
+      const itsNull = isNull(data, dataName);
+      const checkType = checkDataType(data, dataNumber, dataString);
+      if(itsNull){
+        return response(res, 'Please fill in all the fields.', null, 400);
+      }
+      if(checkType.length>0){
+        return response(res, checkType, null, 400);
+      }
+      const checkVehicle = await vehicleModel.getVehicleName(data);
+      if(checkVehicle.length>0){
+        return response(res, 'Vehicle already on the list', null, 400);
+      }
+      const addResult = await vehicleModel.addVehicle(data);
+      if(addResult.affectedRows>0){
+        const resultId = await vehicleModel.getVehicle(addResult.insertId);
+        if(resultId.length===1){
+          return response(res, 'Successfully add vehicle', resultId[0]);
+        }else{
+          return response(res, 'Error: Can\'t get data', null, 500);
+        }
       }else{
-        return response(res, 'Error: Can\'t get data', null, 500);
+        return response(res, 'Error: Can\'t add vehicle', null, 500);
       }
     }else{
-      return response(res, 'Error: Can\'t add vehicle', null, 500);
+      return response(res, 'You are unable to do this action', null, 403);
     }
-  }else{
-    return response(res, 'You are unable to do this action', null, 403);
-  }
+  });
 };
 
 exports.updateVehicle = async(req, res)=>{
