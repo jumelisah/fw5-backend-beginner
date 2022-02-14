@@ -90,7 +90,6 @@ exports.createUser = async(req, res)=>{
     }
 
     const addUser = await usersProfile.createUser(data);
-    console.log('satu', addUser)
     if(addUser.affectedRows<1){
       return response(res, 'Unexpected error: Can\'t register new user', null, 500);
     }
@@ -104,7 +103,6 @@ exports.createUser = async(req, res)=>{
       type: 2
     };
     const addConfirmCode = await authModel.requestCode(codeData);
-    console.log(addConfirmCode)
     if(addConfirmCode.affectedRows<1){
       return response(res, 'Unexpected error: Can\'t get confirmation code', null, 500);
     }
