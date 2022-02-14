@@ -1,7 +1,14 @@
 const db = require('../helpers/db');
 
-exports.getUsers = ()=>new Promise((resolve, reject)=>{
-  db.query('SELECT * FROM users', (err, res)=>{
+exports.getUsers = (data)=>new Promise((resolve, reject)=>{
+  db.query(`SELECT * FROM users WHERE name LIKE '%${data.name}%' LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
+exports.countData = (data)=>new Promise((resolve, reject)=>{
+  db.query(`SELECT COUNT(*) AS total FROM users WHERE name LIKE '%${data.name}%'`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });

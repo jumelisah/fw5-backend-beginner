@@ -36,8 +36,8 @@ const isDate = (date)=>{
   }
 };
 
-const changeDate = (date)=>{
-  const expired = moment(date).add(2, 'm').toDate();
+const changeDate = (date, y)=>{
+  const expired = moment(date).add(y, 'm').toDate();
   let b = expired.getDate();
   let a = expired.getMonth()+1;
   let c = expired.getHours();
@@ -54,4 +54,36 @@ const changeDate = (date)=>{
   return x;
 };
 
-module.exports = {isDate, changeDate};
+const dateDifference = (dateA, dateB)=>{
+  const firstDate = new Date(dateA);
+  const secondDate = new Date(dateB);
+  const diff = Math.abs(firstDate.getTime()-secondDate.getTime())/(1000*3600*24);
+  return diff;
+};
+
+const getDateDiff = (dateA, dateB)=>{
+  const a = isDate(dateA);
+  const b = isDate(dateB);
+  if(a=='Invalid Date'){
+    return 'Invalid Date';
+  }
+  if(b=='Invalid Date'){
+    return 'Invalid Date';
+  }
+  let c = changeDate(a);
+  let d = changeDate(b);
+  let e = dateDifference(c, d);
+  return e;
+};
+
+const isLessThan = (timeA, timeB)=>{
+  const a = timeA.getTime();
+  const b = timeB.getTime();
+  if(a<b){
+    return true;
+  }else{
+    return false;
+  }
+};
+
+module.exports = {isDate, changeDate, dateDifference, getDateDiff, isLessThan};

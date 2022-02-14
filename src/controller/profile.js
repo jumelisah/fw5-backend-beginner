@@ -1,7 +1,10 @@
 const prof = require('../models/profile');
 
 const getProfile = (req, res)=>{
-  const {id} = req.params;
+  let {id} = req.params;
+  if(id==undefined || id==null || id==''){
+    id = req.user.id;
+  }
   if(id>0){
     prof.getProfile(id, result=>{
       if(result.length>0){
@@ -24,12 +27,6 @@ const getProfile = (req, res)=>{
     });
   }
   
-  if(id==undefined || id==null){
-    return res.status(400).send({
-      success: false,
-      message: 'Undefined ID'
-    });
-  }
 };
 
 module.exports = {getProfile};

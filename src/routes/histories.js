@@ -1,14 +1,14 @@
 const histories = require('express').Router();
 
-const {getHistories, getHistory, getHistoryId, addHistories, updateHistory, deleteHistory} = require('../controller/histories');
+const { getHistories, getHistory, addHistory, updateHistory, deleteHistory } = require('../controller/histasync');
+const { verifyUser } = require('../helpers/auth');
 
-histories.get('/', getHistories);
-histories.get('/:id', getHistory);
-histories.get('/vehicles/:vehicle_id', getHistoryId);
-histories.post('/', addHistories);
-histories.patch('/:id', updateHistory);
-histories.patch('/', updateHistory);
-histories.delete('/:id', deleteHistory);
-histories.delete('/', deleteHistory);
+histories.get('/', verifyUser, getHistories);
+histories.get('/:id', verifyUser, getHistory);
+histories.post('/', verifyUser, addHistory);
+histories.patch('/:id', verifyUser, updateHistory);
+histories.patch('/', verifyUser, updateHistory);
+histories.delete('/:id', verifyUser, deleteHistory);
+histories.delete('/', verifyUser, deleteHistory);
 
 module.exports = histories;

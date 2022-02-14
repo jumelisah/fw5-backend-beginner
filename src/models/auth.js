@@ -10,21 +10,21 @@ exports.login = (data)=>{
 };
 
 exports.getUsername = (username) => new Promise((resolve, reject)=>{
-  db.query(`SELECT id, username, email, password, role FROM users WHERE username='${username}' OR email='${username}'`, (err, res)=>{
+  db.query(`SELECT id, username, email, password, role, is_confirmed FROM users WHERE username='${username}' OR email='${username}'`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
 });
 
-exports.requestPassword = (data)=>new Promise((resolve, reject)=>{
-  db.query(`INSERT INTO request_password (user_id, code, expired_date) VALUES(${data.user_id}, ${data.code}, ${data.expired_date})`, (err, res)=>{
+exports.requestCode = (data)=>new Promise((resolve, reject)=>{
+  db.query(`INSERT INTO confirm_code (user_id, code, expired_date, type) VALUES(${data.user_id}, ${data.code}, ${data.expired_date}, ${data.type})`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
 });
 
-exports.updateReqPassword = (id)=>new Promise((resolve, reject)=>{
-  db.query('UPDATE request_password SET status = 0 WHERE id=?', [id], (err, res)=>{
+exports.updateReqCode = (id)=>new Promise((resolve, reject)=>{
+  db.query('UPDATE confirm_code SET status = 0 WHERE id=?', [id], (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
@@ -37,8 +37,15 @@ exports.updatePassword = (password, id)=>new Promise((resolve, reject)=>{
   });
 });
 
-exports.codeCompare = (code)=>new Promise((resolve, reject)=>{
-  db.query(`SELECT * FROM request_password WHERE code=${code}`, (err, res)=>{
+exports.codeCompare = (code, user_id)=>new Promise((resolve, reject)=>{
+  db.query(`SELECT * FROM confirm_code WHERE code=${code} AND user_id=${user_id}`, (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
+exports.statusConfirm = (user_id)=>new Promise((resolve, reject)=>{
+  db.query(`UPDATE users SET is_confirmed=1 WHERE id=${user_id}`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });

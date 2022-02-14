@@ -6,7 +6,7 @@ const upload = require('../helpers/upload');
 
 vehicles.get('/', getVehicles);
 vehicles.get('/:id', getVehicle);
-vehicles.post('/', verifyUser, upload.single('image'), addVehicle);
+vehicles.post('/', verifyUser, addVehicle);
 vehicles.patch('/', verifyUser, updateVehicle);
 vehicles.patch('/:id', verifyUser, upload.single('image'), updateVehicle);
 vehicles.delete('/', verifyUser, deleteVehicle);

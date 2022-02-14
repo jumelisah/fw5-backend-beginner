@@ -1,17 +1,38 @@
 const usersProfile = require('../models/users');
+const authModel = require('../models/auth');
 const bcrypt = require('bcrypt');
-const {APP_URL} = process.env;
+const {APP_URL, APP_EMAIL} = process.env;
+const mail = require('../helpers/mail');
 const response = require('../helpers/response');
 const isEmail = require('../helpers/emailvalidator');
 const isNull = require('../helpers/isNull');
 const checkDataType = require('../helpers/dataType');
-const isDate = require('../helpers/dateValidator');
+const {isDate, changeDate} = require('../helpers/dateValidator');
 
 exports.getUsers = async(req, res)=>{
   if(req.user.role==='admin'){
-    const result = await usersProfile.getUsers();
+    let {name, page, limit} = req.query;
+    name = name || '';
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 5;
+    const offset = (page-1)*limit;
+    const data = {name, page, limit, offset};
+    const result = await usersProfile.getUsers(data);
+    const totalData = await usersProfile.countData(data);
+    let url = `${APP_URL}/users?`;
+    if(name!==''){
+      url = `${url}name=${name}`;
+    }
+    const total = totalData[0].total;
+    let last = Math.ceil(total/limit);
+    const pageInfo = {
+      prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
+      next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
+      currentPage : page,
+      lastPage: last
+    };
     if(result.length>0){
-      return response(res, 'List of users', result);
+      return response(res, 'List of users', [result, pageInfo]);
     }else{
       return response(res, 'No data found', null);
     }
@@ -21,8 +42,8 @@ exports.getUsers = async(req, res)=>{
 };
 
 exports.getUser = async(req, res)=>{
-  if(req.user.role=='admin'){
-    const {id} = req.params;
+  const {id} = req.params;
+  if(req.user.role=='admin' || req.user.id==id){
     const resultId = await usersProfile.getUser(id);
     if(resultId.length>0){
       return response(res, 'User detail', resultId[0]);
@@ -35,7 +56,8 @@ exports.getUser = async(req, res)=>{
 };
 
 exports.createUser = async(req, res)=>{
-  const {name, username, email, password: rawPassword} = req.body;
+  const {name, username, email, password: rawPassword, confirmPassword} = req.body;
+  console.log(req.body.confirmPassword);
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
@@ -49,33 +71,55 @@ exports.createUser = async(req, res)=>{
     if(!isNaN(name)){
       return response(res, 'Name should be a STRING!', null, 400);
     }
+    if(rawPassword!==confirmPassword){
+      return response(res, 'Passwords not match', null, 400);
+    }
   
     const itsEmail = isEmail(email);
     if(itsEmail){
-      const checkUname = await usersProfile.getUserUname(username);
-      console.log(checkUname);
-      if(checkUname.length>0){
-        return response(res, 'Username not available', null, 400);
-      }
-  
       const checkEmail = await usersProfile.getEmail(email);
       if(checkEmail.length>0){
         return response(res, 'Email has been used', null, 400);
       }
-  
-      const addResult = await usersProfile.createUser(data);
-      if(addResult.affectedRows>0){
-        const newUserResult = await usersProfile.getUser(addResult.insertId);
-        if(newUserResult.length>0){
-          return response(res, 'Successfully register a new user', newUserResult[0]);
-        }else{
-          return response(res, 'Error: Can\'t get new user data', null, 500);
-        }
-      }else{
-        return response(res, 'Error: Can\'t add user', null, 500);
-      }
     }else{
-      return response(res, 'Wrong email format!', null, 400);
+      return response(res, 'Invalid email', null, 400);
+    }
+    const checkUname = await usersProfile.getUserUname(username);
+    if(checkUname.length>0){
+      return response(res, 'Username not available', null, 400);
+    }
+
+    const addUser = await usersProfile.createUser(data);
+    console.log('satu', addUser)
+    if(addUser.affectedRows<1){
+      return response(res, 'Unexpected error: Can\'t register new user', null, 500);
+    }
+    const date = new Date();
+    const expired_date = changeDate(date, 10);
+    const randomCode = Math.abs(Math.round(Math.random()*(999999-100000)+100000));
+    const codeData = {
+      user_id : addUser.insertId,
+      code: randomCode,
+      expired_date,
+      type: 2
+    };
+    const addConfirmCode = await authModel.requestCode(codeData);
+    console.log(addConfirmCode)
+    if(addConfirmCode.affectedRows<1){
+      return response(res, 'Unexpected error: Can\'t get confirmation code', null, 500);
+    }
+    const info = await mail.sendMail({
+      from: APP_EMAIL,
+      to: email,
+      subject: 'Register Confirmation | Backend Beginner',
+      text: String(randomCode),
+      html: `Here's the code you need to confirm your account: <b>${randomCode}</b>`
+    });
+    console.log('yai', info);
+    if(info){
+      return response(res, 'Register success. We\'ve sent confirmation code to your email.', null);
+    }else{
+      return response(res, 'Unexpected error: Can\'t send confirmation code', null);
     }
   }catch(err){
     return response(res, 'Input the password!', null, 400);
@@ -83,11 +127,14 @@ exports.createUser = async(req, res)=>{
 };
 
 exports.updateUser = async(req, res)=>{
-  const {id} = req.params;
+  let {id} = req.params;
+  if(!id){
+    id=req.user.id;
+  }
   let image = '';
   const data = {};
   if(req.file){
-    image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
+    image = `${req.file.destination}${req.file.filename}`;
     data.image = image;
   }
   if(id==null || id==undefined || id==''){
@@ -120,14 +167,13 @@ exports.updateUser = async(req, res)=>{
     }
   }
   
-
   if(req.user.id==id){
     const dataName = ['name', 'username', 'email', 'password', 'role', 'phone_number', 'gender', 'birthdate', 'address'];
 
     const resultId = await usersProfile.getUser(id);
     if(resultId.length>0){
       dataName.forEach(x=>{
-        if(req.body[x]){
+        if(req.body[x] || req.body[x]==''){
           data[x] = req.body[x];
         }else{
           data[x] = resultId[0][x];
@@ -137,8 +183,11 @@ exports.updateUser = async(req, res)=>{
       if(checkType.length>0){
         return response(res, checkType, null, 400);
       }
-      if(data.password){
-        if(data.password.length>=6){
+      if(req.body.password==''){
+        return response(res, 'Please input the password', null, 400);
+      }
+      if(req.body.password){
+        if(req.body.password.length>=6){
           const salt = await bcrypt.genSalt(10);
           const password = await bcrypt.hash(data.password, salt);
           data.password = password;
@@ -172,8 +221,8 @@ exports.updateUser = async(req, res)=>{
           return response(res, 'Username not available', null, 400);
         }
       }
-      if(data.birthdate){
-        const itsDate = isDate(data.birthdate);
+      if(req.body.birthdate){
+        const itsDate = isDate(req.body.birthdate);
         if(itsDate!=='Invalid Date'){
           data.birthdate = itsDate;
         }else{
