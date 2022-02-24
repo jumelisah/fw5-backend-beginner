@@ -139,7 +139,7 @@ exports.confirmAccount = async(req, res)=>{
   }
   const code_id = checkCode[0].id;
   if(checkCode[0].status==0){
-    return response(res, 'Code has been used.', null, 400);
+    return response(res, 'Account has been confirmed.', null, 400);
   }
   const itsLessThan = isLessThan(new Date(), checkCode[0].expired_date);
   if(!itsLessThan){
@@ -177,5 +177,5 @@ exports.confirmAccount = async(req, res)=>{
   if(changeStat.affectedRows<1){
     return response(res, 'Unexpected error: Can\'t change confirmation status', null, 500);
   }
-  return response(res, 'Thanks for confirmation email', null);
+  return response(res, 'Thanks for confirm your account', null);
 };

@@ -1,3 +1,4 @@
+const response = require('../helpers/response');
 const vehicleCategories = require('../models/categories');
 
 const getCategories = (req, res)=>{
@@ -30,6 +31,9 @@ const getCategory = (req, res)=>{
 
 const addCategory = (req, res)=>{
   const {category} = req.body;
+  if(!category){
+    return response(res, 'Please input category name', null, 400);
+  }
   vehicleCategories.checkCategory(category, results=>{
     if(results.length<1){
       vehicleCategories.addCategory(category, result=>{
@@ -54,6 +58,10 @@ const updateCategory = (req, res)=>{
   const {id} = req.params;
   const {category} = req.body;
   const data = [category, id];
+
+  if(!id || id==''){
+    return response(res, 'Undefined ID', null, 400);
+  }
   vehicleCategories.getCategory(id, results=>{
     if(results.length>0){
       vehicleCategories.checkCategory(category, result=>{
