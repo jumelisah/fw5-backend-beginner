@@ -35,6 +35,13 @@ exports.getVehicleName = (data)=>new Promise((resolve, reject)=>{
   });
 });
 
+exports.getPopularVehicle = (data)=>new Promise((resolve, reject)=>{
+  db.query(`SELECT v.id AS id, v.name AS name FROM vehicles v JOIN histories h ON v.id=h.vehicle_id WHERE v.name='%${data.name}%'`, (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
 exports.updateVehicle = (data, id)=>new Promise((resolve, reject)=>{
   db.query('UPDATE vehicles SET ? WHERE id=?', [data, id], (err, res)=>{
     if(err) reject(err);

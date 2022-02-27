@@ -38,7 +38,11 @@ exports.getVehicles = async(req, res)=>{
     lastPage: last
   };
   if(vehicleData.length>0){
-    return response(res, 'List of vehicles', {vehicle_data: vehicleData, page_info: pageInfo});
+    return res.json({
+      success: true,
+      message: 'List of popular vehicle',
+      result: vehicleData, pageInfo
+    });
   }else{
     return response(res, 'Data not found', null, 404);
   }
@@ -54,7 +58,50 @@ exports.getVehicle = async(req, res)=>{
       return response(res, `Vehicle with ID=${id} not found`, null, 404);
     }
   }else{
-    return response(res, 'ID should be a number greater than 0');
+    return response(res, 'ID should be a number greater than 0', null, 404);
+  }
+};
+
+exports.getPopularVehicle = async(req, res)=>{
+  let {name, location, cost_min, cost_max, page, limit} = req.query;
+  name = name || '';
+  location = location || '';
+  cost_min = parseInt(cost_min) || 0;
+  cost_max = parseInt(cost_max) || 1000000;
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 5;
+  const offset = (page-1)*limit;
+  const data = {name, location, cost_min, cost_max, page, limit, offset};
+  const dataName = ['name', 'location', 'cost_min', 'cost_max'];
+
+  let url = `${APP_URL}/vehicles?`;
+  dataName.forEach(x=>{
+    if(data[x]){
+      url = `${url}${x}=${data[x]}&`;
+    }
+  });
+  if(cost_min>=cost_max){
+    return response(res, 'cost_max should be more than cost_min', null, 400);
+  }
+
+  const vehicleData = await vehicleModel.getPopularVehicle(data);
+  const totalData = await vehicleModel.countData(data);
+  const total = totalData[0].total;
+  let last = Math.ceil(total/limit);
+  const pageInfo = {
+    prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
+    next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
+    currentPage : page,
+    lastPage: last
+  };
+  if(vehicleData.length>0){
+    return res.json({
+      success: true,
+      message: 'List of popular vehicle',
+      result: vehicleData, pageInfo
+    });
+  }else{
+    return response(res, 'Data not found', null, 404);
   }
 };
 
@@ -68,7 +115,7 @@ exports.addVehicle = (req, res)=>{
       let image = null;
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
       if(req.file){
-        image = `${req.file.destination}${req.file.filename}`;
+        image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
         data.image = image;
       }
       console.log(data.image);

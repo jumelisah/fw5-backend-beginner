@@ -1,10 +1,11 @@
 const vehicles = require('express').Router();
 
-const {getVehicles, getVehicle, addVehicle, updateVehicle, deleteVehicle} = require('../controller/vehicles');
+const {getVehicles, getVehicle, addVehicle, updateVehicle, deleteVehicle, getPopularVehicle} = require('../controller/vehicles');
 const { verifyUser } = require('../helpers/auth');
 const upload = require('../helpers/upload');
 
 vehicles.get('/', getVehicles);
+vehicles.get('/popular', getPopularVehicle);
 vehicles.get('/:id', getVehicle);
 vehicles.post('/', verifyUser, addVehicle);
 vehicles.patch('/', verifyUser, updateVehicle);

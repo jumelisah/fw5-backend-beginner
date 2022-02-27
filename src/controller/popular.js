@@ -27,10 +27,8 @@ const popularList = (req, res)=>{
   }
   popularRent.popularList(data, results=>{
     if(results.length>0){
-      popularRent.totalData(result=>{
-        console.log(result);
+      popularRent.totalData(data, result=>{
         const total = result.length;
-        console.log(result);
         console.log(total);
         let last = Math.ceil(total/limit);
         const pageInfo = {
@@ -76,7 +74,7 @@ const popularByTown = (req, res)=>{
         return res.json({
           success: true,
           message: `List of popular vehicle in ${data.location}`,
-          result: {results, pageInfo}
+          result: results, pageInfo
         });
 
       });
@@ -95,19 +93,35 @@ const popularId = (req, res)=>{
   limit = parseInt(limit) || 5;
   const offset = (page-1)*limit;
   const data = {vehicle_name, location, cost_min, cost_max, page, limit, offset, category_id};
+  const dataName = ['vehicle_name', 'location', 'cost_min', 'cost_max'];
   if(cost_min>=cost_max){
     return res.status(400).send({
       success: false,
       message: 'cost_min should be less than cost_max'
     });
   }
+  let url = `${APP_URL}/popular/${category_id}?`;
+  dataName.forEach(x=>{
+    if(data[x]){
+      url = `${url}${x}=${data[x]}&`;
+    }
+  });
   if(category_id>0){
     popularRent.popularId(data, result=>{
       if(result.length>0){
+        const total = result.length;
+        let last = Math.ceil(total/limit);
+        const pageInfo = {
+          prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
+          next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
+          currentPage : page,
+          lastPage: last
+        };
         return res.json({
           success: true,
           message: 'list id',
-          result: result
+          result: result,
+          pageInfo
         });
       }else{
         return res.status(404).send({
@@ -170,4 +184,6 @@ const popularByMonth = (req, res)=>{
     popularRent.popularMonthAndCId(data, cb);
   }
 };
+
+
 module.exports = {popularList, popularId, popularByMonth, popularByTown};
