@@ -2,18 +2,24 @@ const popularRent = require('../models/popular');
 const {APP_URL} = process.env;
 
 const popularList = (req, res)=>{
-  let {vehicle_name, location, cost_min, cost_max, page, limit} = req.query;
-  vehicle_name = vehicle_name || '';
+  let {name, location, category, cost_min, cost_max, type, page, limit, sortBy, rentDate} = req.query;
+  name = name || '';
   location = location || '';
+  category = category || '';
+  type = type || '';
+  sortBy = sortBy || 'id DESC';
+  let a = sortBy.split(' ');
   cost_min = parseInt(cost_min) || 0;
   cost_max = parseInt(cost_max) || 10000000;
+  rentDate = new Date();
+  const setRentDate = `${rentDate.getFullYear()}-${rentDate.getMonth()+1}-${rentDate.getDate()}`;
   page = parseInt(page) || 1;
   limit = parseInt(limit) || 4;
   const offset = (page-1)*limit;
-  const data = {vehicle_name, location, cost_min, cost_max, page, limit, offset};
-  const dataName = ['name', 'location', 'cost_min', 'cost_max'];
+  const data = {name, location, category, cost_min, cost_max, type, sortBy, page, limit, offset, setRentDate};
+  const dataName = ['name', 'location', 'category', 'cost_min', 'cost_max', 'type'];
 
-  let url = `${APP_URL}/popular?`;
+  let url = `${APP_URL}/popular?sortBy=${a[0]}+${a[1]}&`;
   dataName.forEach(x=>{
     if(data[x]){
       url = `${url}${x}=${data[x]}&`;
@@ -22,7 +28,7 @@ const popularList = (req, res)=>{
   if(cost_min>=cost_max){
     return res.status(400).send({
       success: false,
-      message: 'cost_min should be less than cost_max'
+      message: 'Minimum cost should be less than maximum cost'
     });
   }
   popularRent.popularList(data, results=>{
@@ -44,7 +50,7 @@ const popularList = (req, res)=>{
         });
       });
     }else{
-      return res.send({
+      return res.status(404).send({
         success: false,
         message: 'Data not found'
       });}
