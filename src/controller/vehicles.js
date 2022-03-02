@@ -156,8 +156,8 @@ exports.updateVehicle = async(req, res)=>{
   if(req.user.role=='admin'){
     const data = {};
     let image ='';
+    console.log(req.file);
     if(req.file){
-      console.log(req.file);
       image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
       data.image = image;
     }
