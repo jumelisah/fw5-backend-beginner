@@ -157,6 +157,7 @@ exports.updateVehicle = async(req, res)=>{
     const data = {};
     let image ='';
     if(req.file){
+      console.log(req.file);
       image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
       data.image = image;
     }
