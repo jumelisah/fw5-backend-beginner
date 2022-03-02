@@ -35,7 +35,6 @@ const popularList = (req, res)=>{
     if(results.length>0){
       popularRent.totalData(data, result=>{
         const total = result.length;
-        console.log(total);
         let last = Math.ceil(total/limit);
         const pageInfo = {
           prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
