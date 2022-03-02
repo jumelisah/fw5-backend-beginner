@@ -158,7 +158,7 @@ exports.updateVehicle = async(req, res)=>{
     let image ='';
     console.log(req.file);
     if(req.file){
-      image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
+      image = `${APP_URL}${req.file.destination}${req.file.filename}`;
       data.image = image;
     }
     const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
