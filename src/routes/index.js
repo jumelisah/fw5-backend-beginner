@@ -7,5 +7,11 @@ route.use('/histories', require('./histories'));
 route.use('/popular', require('./popular'));
 route.use('/profile', require('./profile'));
 route.use('/categories', require('./categories'));
+route.get('/', (req, res)=>{
+  return res.json({
+    success: true,
+    message: 'Backend is going well'
+  });
+});
 
 module.exports = route;
