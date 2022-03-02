@@ -9,6 +9,6 @@ app.use('/uploads', express.static('uploads'));
 
 const {APP_PORT} = process.env;
 
-app.listen(process.env.PORT || 8000, ()=>{
+app.listen(process.env.PORT || APP_PORT, ()=>{
   console.log(`App listening on port ${APP_PORT}`);
 });
