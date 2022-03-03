@@ -151,57 +151,62 @@ exports.addVehicle = (req, res)=>{
   });
 };
 
-exports.updateVehicle = async(req, res)=>{
-  const {id} = req.params;
-  if(req.user.role=='admin'){
-    const data = {};
-    let image ='';
-    console.log(req.file);
-    if(req.file){
-      image = `${APP_URL}${req.file.destination}${req.file.filename}`;
-      data.image = image;
+exports.updateVehicle = (req, res)=>{
+  upload(req, res, async(err)=>{
+    if(err){
+      return response(res, err.message, null, 400);
     }
-    const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
-    const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
-    const dataString = ['name', 'location'];
-    if(id==null || id==undefined || id==''){
-      return response(res, 'Please input the ID first!', null, 400);
-    }
-    if(id<1){
-      return response(res, 'ID should be a number greater than 0', null, 400);
-    }
-    const checkType = checkDataType(data, dataNumber, dataString);
-    if(checkType.length>0){
-      return response(res, checkType, null, 400);
-    }
-    const resultId = await vehicleModel.getVehicle(id);
-    if(resultId.length<1){
-      return response(res, `Vehicle with ID=${id} not found`, null, 404);
-    }
-    dataName.forEach(x=>{
-      if(req.body[x]){
-        data[x] = req.body[x];
-      }else{
-        data[x] = resultId[0][x];
+    const {id} = req.params;
+    if(req.user.role=='admin'){
+      const data = {};
+      let image ='';
+      console.log(req.file);
+      if(req.file){
+        image = `${APP_URL}${req.file.destination}${req.file.filename}`;
+        data.image = image;
       }
-      if(image == ''){
-        data.image = resultId[0].image;
+      const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
+      const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
+      const dataString = ['name', 'location'];
+      if(id==null || id==undefined || id==''){
+        return response(res, 'Please input the ID first!', null, 400);
       }
-    });
-    const checkVehicle = await vehicleModel.getVehicleName(data);
-    if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
-      return response(res, 'Vehicle already on the list', null, 400);
-    }
-    const updateResult = await vehicleModel.updateVehicle(data, id);
-    if(updateResult.affectedRows>0){
-      const newVehicle = await vehicleModel.getVehicle(id);
-      if(newVehicle.length>0){
-        return response(res, 'Successfully update vehicle data', newVehicle[0]);
+      if(id<1){
+        return response(res, 'ID should be a number greater than 0', null, 400);
       }
+      const checkType = checkDataType(data, dataNumber, dataString);
+      if(checkType.length>0){
+        return response(res, checkType, null, 400);
+      }
+      const resultId = await vehicleModel.getVehicle(id);
+      if(resultId.length<1){
+        return response(res, `Vehicle with ID=${id} not found`, null, 404);
+      }
+      dataName.forEach(x=>{
+        if(req.body[x]){
+          data[x] = req.body[x];
+        }else{
+          data[x] = resultId[0][x];
+        }
+        if(image == ''){
+          data.image = resultId[0].image;
+        }
+      });
+      const checkVehicle = await vehicleModel.getVehicleName(data);
+      if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
+        return response(res, 'Vehicle already on the list', null, 400);
+      }
+      const updateResult = await vehicleModel.updateVehicle(data, id);
+      if(updateResult.affectedRows>0){
+        const newVehicle = await vehicleModel.getVehicle(id);
+        if(newVehicle.length>0){
+          return response(res, 'Successfully update vehicle data', newVehicle[0]);
+        }
+      }
+    }else{
+      return response(res, 'You are unable to do this action', null, 403);
     }
-  }else{
-    return response(res, 'You are unable to do this action', null, 403);
-  }
+  });
 };
 
 exports.deleteVehicle = async(req, res)=>{
