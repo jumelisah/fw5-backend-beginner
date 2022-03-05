@@ -17,7 +17,7 @@ exports.getVehicles = async(req, res)=>{
   const data = {name, location, cost_min, cost_max, page, limit, offset};
   const dataName = ['name', 'location', 'cost_min', 'cost_max'];
 
-  let url = `${APP_URL}/vehicles?`;
+  let url = `${APP_URL}vehicles?`;
   dataName.forEach(x=>{
     if(data[x]){
       url = `${url}${x}=${data[x]}&`;
@@ -74,7 +74,7 @@ exports.getPopularVehicle = async(req, res)=>{
   const data = {name, location, cost_min, cost_max, page, limit, offset};
   const dataName = ['name', 'location', 'cost_min', 'cost_max'];
 
-  let url = `${APP_URL}/vehicles?`;
+  let url = `${APP_URL}vehicles?`;
   dataName.forEach(x=>{
     if(data[x]){
       url = `${url}${x}=${data[x]}&`;
