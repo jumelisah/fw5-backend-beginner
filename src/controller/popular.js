@@ -19,7 +19,7 @@ const popularList = (req, res)=>{
   const data = {name, location, category, cost_min, cost_max, type, sortBy, page, limit, offset, setRentDate};
   const dataName = ['name', 'location', 'category', 'cost_min', 'cost_max', 'type'];
 
-  let url = `${APP_URL}popular?sortBy=${a[0]}+${a[1]}&`;
+  let url = `${APP_URL}/popular?sortBy=${a[0]}+${a[1]}&`;
   dataName.forEach(x=>{
     if(data[x]){
       url = `${url}${x}=${data[x]}&`;
