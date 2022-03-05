@@ -115,7 +115,7 @@ exports.addVehicle = (req, res)=>{
       let image = null;
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
       if(req.file){
-        image = `${APP_URL}/${req.file.destination}${req.file.filename}`;
+        image = `${APP_URL}${req.file.destination}${req.file.filename}`;
         data.image = image;
       }
       console.log(data.image);
