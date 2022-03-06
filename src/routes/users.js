@@ -1,6 +1,5 @@
 const users = require('express').Router();
-const { updateUser } = require('../controller/updateUser');
-const {getUsers, getUser, createUser, deleteUser} = require('../controller/users');
+const {getUsers, getUser, createUser, deleteUser, updateUser} = require('../controller/users');
 const { verifyUser } = require('../helpers/auth');
 const upload = require('../helpers/upload');
 
