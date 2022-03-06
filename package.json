@@ -7,8 +7,7 @@
     "start":"node index.js",
     "dev":"nodemon index.js",
     "test":"echo \"Error: no test specified\" && exit 1",
-    "eslint":"eslint ./**/*.js --fix",
-    "postinstall": "ng build"
+    "eslint":"eslint ./**/*.js --fix"
   },
   "repository": {
     "type": "git",
