@@ -19,7 +19,7 @@ const popularList = (req, res)=>{
   const data = {name, location, category, cost_min, cost_max, type, sortBy, page, limit, offset, setRentDate};
   const dataName = ['name', 'location', 'category', 'cost_min', 'cost_max', 'type'];
 
-  let url = `${APP_URL}/popular?sortBy=${a[0]}+${a[1]}&`;
+  let url = `${APP_URL}popular?sortBy=${a[0]}+${a[1]}&`;
   dataName.forEach(x=>{
     if(data[x]){
       url = `${url}${x}=${data[x]}&`;
@@ -64,7 +64,7 @@ const popularByTown = (req, res)=>{
   const offset = (page-1)*limit;
 
   const data= {location, page, limit, offset};
-  let url = `${APP_URL}/popular?city=${location}&`;
+  let url = `${APP_URL}popular?city=${location}&`;
   popularRent.popularByTown(data, results=>{
     if(results.length>0){
       popularRent.totalPopularTown(data, result=>{
@@ -105,7 +105,7 @@ const popularId = (req, res)=>{
       message: 'cost_min should be less than cost_max'
     });
   }
-  let url = `${APP_URL}/popular/${category_id}?`;
+  let url = `${APP_URL}popular/${category_id}?`;
   dataName.forEach(x=>{
     if(data[x]){
       url = `${url}${x}=${data[x]}&`;
