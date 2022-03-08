@@ -1,5 +1,5 @@
 const checkDataType = require('../helpers/dataType');
-const { isDate, dateDifference, changeDate, isLessThan } = require('../helpers/dateValidator');
+const { isDate, dateDifference, changeDate, isLessThan} = require('../helpers/dateValidator');
 const isNull = require('../helpers/isNull');
 const response = require('../helpers/response');
 const historyModel = require('../models/histasync');
@@ -67,9 +67,18 @@ exports.addHistory = async(req, res)=>{
   if(itsReturnDate=='Invalid Date'){
     return response(res, itsReturnDate, null, 400);
   }
-  const itsLessThan = isLessThan(rent_date, return_date);
+  const lessThanToday = isLessThan(rent_date, new Date()); //Check if rent date less than today
+  const diffToday = dateDifference(rent_date, new Date()); //Check how many days before rent date
+  if(lessThanToday || diffToday<1){
+    return response(res, 'Reservation should be made at least 1 day before rent date', null, 400);
+  }
+  console.log(lessThanToday, diffToday);
+  const itsLessThan = isLessThan(rent_date, return_date); //Check if rent date less than return date
   if(!itsLessThan){
     return response(res, 'Rent date should be earlier than return date!', null, 400);
+  }
+  if(lessThanToday<1){
+    return response(res, 'Reserva', null, 400);
   }
   const getUser = await userModel.getUser(data.user_id);
   if (getUser.length<1){
