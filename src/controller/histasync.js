@@ -44,6 +44,16 @@ exports.getHistory = async(req, res)=>{
   }
 };
 
+exports.getUserHistories = async(req, res)=>{
+  const user_id = req.user.id;
+  const historyResult = await historyModel.userHistories(user_id);
+  if(historyResult.length>0){
+    return response(res, 'Rent History', historyResult);
+  }else{
+    return response(res, 'History not found', null, 404);
+  }
+};
+
 exports.addHistory = async(req, res)=>{
   const user_id = req.user.id;
   const {vehicle_id, sum, rent_date, return_date} = req.body;
@@ -76,9 +86,6 @@ exports.addHistory = async(req, res)=>{
   const itsLessThan = isLessThan(rent_date, return_date); //Check if rent date less than return date
   if(!itsLessThan){
     return response(res, 'Rent date should be earlier than return date!', null, 400);
-  }
-  if(lessThanToday<1){
-    return response(res, 'Reserva', null, 400);
   }
   const getUser = await userModel.getUser(data.user_id);
   if (getUser.length<1){

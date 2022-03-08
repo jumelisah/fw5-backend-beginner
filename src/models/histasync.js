@@ -21,6 +21,13 @@ exports.getUser = (user_id)=>new Promise((resolve, reject)=>{
   });
 });
 
+exports.userHistories = (user_id) => new Promise((resolve, reject)=>{
+  db.query(`SELECT * FROM histories WHERE user_id=${user_id}`, (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
 exports.addHistory = (data)=>new Promise((resolve, reject)=>{
   db.query(`INSERT INTO histories (vehicle_id, user_id, sum, total_cost, prepayment, rent_date, return_date) VALUES(${data.vehicle_id}, ${data.user_id}, ${data.sum}, ${data.total_cost}, ${data.prepayment}, ${data.rent_date}, ${data.return_date})`, (err, res)=>{
     if(err) reject(err);
