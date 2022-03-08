@@ -1,5 +1,5 @@
 const checkDataType = require('../helpers/dataType');
-const { isDate, dateDifference, changeDate } = require('../helpers/dateValidator');
+const { isDate, dateDifference, changeDate, isLessThan } = require('../helpers/dateValidator');
 const isNull = require('../helpers/isNull');
 const response = require('../helpers/response');
 const historyModel = require('../models/histasync');
@@ -45,61 +45,78 @@ exports.getHistory = async(req, res)=>{
 };
 
 exports.addHistory = async(req, res)=>{
-  if(req.user.role=='admin'){
-    const {vehicle_id, user_id, prepayment, rent_date, return_date} = req.body;
-    const data = {vehicle_id, user_id, prepayment, rent_date, return_date};
-    const dataName = ['vehicle_id', 'user_id', 'prepayment', 'rent_date', 'return_date'];
-    const dataNumber = ['vehicle_id', 'user_id', 'prepayment'];
-    const itsNull = isNull(data, dataName);
-    if(itsNull){
-      return response(res, 'Please fill in all the fields', null, 400);
-    }
-    const dataType = checkDataType(data, dataNumber, []);
-    if(dataType.length>0){
-      return response(res, dataType, null, 400);
-    }
-    const itsDate = isDate(rent_date);
-    if(itsDate=='Invalid Date'){
-      return response(res, itsDate, null, 400);
-    }
-    const itsReturnDate = isDate(return_date);
-    if(itsReturnDate=='Invalid Date'){
-      return response(res, itsReturnDate, null, 400);
-    }
-    const getUser = await userModel.getUser(data.user_id);
-    if (getUser.length<1){
-      return response(res, 'User not found', null, 400);
-    }
-    data.rent_date = changeDate(rent_date);
-    data.return_date = changeDate(return_date);
-    const dateDiff = dateDifference(rent_date, return_date);
-    const userBook = await historyModel.getUser(user_id);
-    if(userBook.length>1){
-      return response(res, 'User already pass rent limit', null, 400);
-    }
-    const getVehicle = await vehicleModel.getVehicle(vehicle_id);
-    if(getVehicle.length<1){
-      return response(res, 'Vehicle not found', null, 404);
-    }
-    if(getVehicle[0].qty<1){
-      return response(res, 'Vehicle not available at the moment', null, 400);
-    }
-    data.cost = getVehicle[0].cost*dateDiff;
-    const min_prepayment = data.cost/2;
-    if(prepayment<min_prepayment){
-      return response(res, `Minimum prepayment should be Rp${min_prepayment}`, null, 400);
-    }
-    if(prepayment>data.cost){
-      return response(res, `Prepayment should be or less than ${data.cost}`, null, 400);
-    }
-    data.remain_payment = data.cost - prepayment;
-    const addResult = await historyModel.addHistory(data);
-    if(addResult.affectedRows>0){
-      return response(res, 'success', null);
-    }
-  }else{
-    return response(res, 'You are not allow to do this action', null, 403);
+  const user_id = req.user.id;
+  const {vehicle_id, sum, rent_date, return_date} = req.body;
+  const data = {vehicle_id, user_id, sum, rent_date, return_date};
+  const dataName = ['vehicle_id', 'sum', 'rent_date', 'return_date'];
+  const dataNumber = ['vehicle_id', 'user_id', 'sum'];
+  console.log(data);
+  const itsNull = isNull(data, dataName);
+  if(itsNull){
+    return response(res, 'Please fill in all the fields', null, 400);
   }
+  const dataType = checkDataType(data, dataNumber, []);
+  if(dataType.length>0){
+    return response(res, dataType, null, 400);
+  }
+  const itsDate = isDate(rent_date);
+  if(itsDate=='Invalid Date'){
+    return response(res, itsDate, null, 400);
+  }
+  const itsReturnDate = isDate(return_date);
+  if(itsReturnDate=='Invalid Date'){
+    return response(res, itsReturnDate, null, 400);
+  }
+  const itsLessThan = isLessThan(rent_date, return_date);
+  if(!itsLessThan){
+    return response(res, 'Rent date should be earlier than return date!', null, 400);
+  }
+  const getUser = await userModel.getUser(data.user_id);
+  if (getUser.length<1){
+    return response(res, 'User not found', null, 400);
+  }
+  data.rent_date = changeDate(rent_date);
+  data.return_date = changeDate(return_date);
+  const dateDiff = dateDifference(rent_date, return_date);
+  const userBook = await historyModel.getUser(user_id);
+  if(userBook.length>1){
+    return response(res, 'You has pass rent limit. Please finish or cancel your past transaction first', null, 400);
+  }
+  const getVehicle = await vehicleModel.getVehicle(vehicle_id);
+  if(getVehicle.length<1){
+    return response(res, 'Vehicle not found', null, 404);
+  }
+  const checkAvailable = await historyModel.getVehicleAvailable(data);
+  let stock = checkAvailable.length+getVehicle[0].qty;
+  if(stock<1){
+    return response(res, 'Vehicle not available at the moment', null, 400);
+  }
+  if(getVehicle[0].qty<0){
+    stock = checkAvailable.length;
+  }
+  if(sum>stock){
+    return response(res, `Maximal order: ${stock} vehicles`, null, 400);
+  }
+  data.total_cost = getVehicle[0].cost*sum*dateDiff;
+  data.prepayment = 0;
+  if(getVehicle[0].prepayment=='Prepayment'){
+    data.prepayment = data.total_cost/2;
+  }
+  const addResult = await historyModel.addHistory(data);
+  if(addResult.affectedRows<1){
+    return response(res, 'Cant do the reservation', null, 500);
+  }
+  const changeQty = await historyModel.updateQtyMin(getVehicle[0].id, data.sum);
+  if(changeQty.affectedRows<1){
+    return response(res, 'Server error', null, 500);
+  }
+  console.log(addResult);
+  const getNewHist = await historyModel.getHistory(addResult.insertId);
+  console.log(getNewHist);
+  if(getNewHist.length<1){
+    return response(res, 'Server error', null, 500);
+  }
+  return response(res, 'Successfully made reservation', getNewHist[0]);
 };
 
 exports.updateHistory = async(req, res)=>{

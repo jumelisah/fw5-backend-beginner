@@ -8,36 +8,33 @@ const isEmail = require('../helpers/emailvalidator');
 const isNull = require('../helpers/isNull');
 const checkDataType = require('../helpers/dataType');
 const {isDate, changeDate} = require('../helpers/dateValidator');
+const upload = require('../helpers/upload').single('image');
 
 exports.getUsers = async(req, res)=>{
-  if(req.user.role==='admin'){
-    let {name, page, limit} = req.query;
-    name = name || '';
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 5;
-    const offset = (page-1)*limit;
-    const data = {name, page, limit, offset};
-    const result = await usersProfile.getUsers(data);
-    const totalData = await usersProfile.countData(data);
-    let url = `${APP_URL}/users?`;
-    if(name!==''){
-      url = `${url}name=${name}`;
-    }
-    const total = totalData[0].total;
-    let last = Math.ceil(total/limit);
-    const pageInfo = {
-      prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
-      next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
-      currentPage : page,
-      lastPage: last
-    };
-    if(result.length>0){
-      return response(res, 'List of users', [result, pageInfo]);
-    }else{
-      return response(res, 'No data found', null);
-    }
+  let {name, page, limit} = req.query;
+  name = name || '';
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 5;
+  const offset = (page-1)*limit;
+  const data = {name, page, limit, offset};
+  const result = await usersProfile.getUsers(data);
+  const totalData = await usersProfile.countData(data);
+  let url = `${APP_URL}/users?`;
+  if(name!==''){
+    url = `${url}name=${name}`;
+  }
+  const total = totalData[0].total;
+  let last = Math.ceil(total/limit);
+  const pageInfo = {
+    prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
+    next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
+    currentPage : page,
+    lastPage: last
+  };
+  if(result.length>0){
+    return response(res, 'List of users', [result, pageInfo]);
   }else{
-    return response(res, 'You are not allow to see this page', null, 403);
+    return response(res, 'No data found', null);
   }
 };
 
@@ -57,11 +54,12 @@ exports.getUser = async(req, res)=>{
 
 exports.createUser = async(req, res)=>{
   const {name, username, email, password: rawPassword, confirmPassword} = req.body;
+  const image = `${APP_URL}uploads/Profile-default.png`;
   console.log(req.body.confirmPassword);
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
-    const data = {name, username, email, password};
+    const data = {name, username, email, password, image};
     const dataName = ['name', 'username', 'email', 'password'];
     const itsNull = isNull(data, dataName);
     if(itsNull){
@@ -124,31 +122,92 @@ exports.createUser = async(req, res)=>{
   }
 };
 
-exports.updateUser = async(req, res)=>{
-  let {id} = req.params;
-  if(!id){
-    id=req.user.id;
-  }
-  let image = '';
-  const data = {};
-  if(req.file){
-    image = `${req.file.destination}${req.file.filename}`;
-    data.image = image;
-  }
-  if(id==null || id==undefined || id==''){
-    return response(res, 'Undefined ID', null, 400);
-  }
-  if(id<=0){
-    return response(res, 'ID should be a number greater than 0');
-  }
-  if(req.body.role){
-    if(req.user.role!=='admin'){
-      return response(res, 'You are not allow to add user role', null, 403);
-    }else{
-      data.role = req.body.role;
+exports.updateUser = (req, res)=>{
+  upload(req, res, async(err)=>{
+    if(err){
+      return response(res, err.message, null, 400,);
+    }
+    let {id} = req.params;
+    if(!id){
+      id=req.user.id;
+    }
+    let image = '';
+    const data = {};
+    if(req.file){
+      image = `${APP_URL}${req.file.destination}${req.file.filename}`;
+      data.image = image;
+    }
+    if(id==null || id==undefined || id==''){
+      return response(res, 'Undefined ID', null, 400);
+    }
+    if(id<=0){
+      return response(res, 'ID should be a number greater than 0');
+    }
+    
+    if(req.user.id==id){
+      const dataName = ['name', 'username', 'email', 'password', 'role', 'phone_number', 'gender', 'birthdate', 'address'];
+  
       const resultId = await usersProfile.getUser(id);
       if(resultId.length>0){
+        dataName.forEach(x=>{
+          if(req.body[x] && req.body[x]!==''){
+            data[x] = req.body[x];
+          }else{
+            data[x] = resultId[0][x];
+          }
+        });
+        const checkType = checkDataType(data, ['phone_number'], ['name']);
+        if(checkType.length>0){
+          return response(res, checkType, null, 400);
+        }
+        if(req.body.password==''){
+          return response(res, 'Please input the password', null, 400);
+        }
+        if(req.body.password){
+          if(req.body.password.length>=6){
+            const salt = await bcrypt.genSalt(10);
+            const password = await bcrypt.hash(data.password, salt);
+            data.password = password;
+          }else{
+            return response(res, 'Password should contain 6 characters and more', null, 400);
+          }
+        }
+      
+        if(data.email){
+          const itsEmail = isEmail(data.email);
+          if(!itsEmail){
+            return response(res, 'Wrong email format!', null, 400);
+          }
+          const checkEmail = await usersProfile.getEmail(data.email);
+          if(checkEmail.length>0 && id!=checkEmail[0].id){
+            return response(res, 'Email has been used', null, 400);
+          }
+        }
+        if(data.phone_number){
+          if(data.phone_number.length<10 || data.phone_number.length>13){
+            return response(res, 'Phone number length should be between 10-13 numbers', null, 400);
+          }
+          const checkPhone = await usersProfile.getPhone(data.phone_number);
+          if(checkPhone.length>0 && id!=checkPhone[0].id){
+            return response(res, 'Phone number has been used', null, 400);
+          }
+        }
+        if(data.username){
+          const checkUname = await usersProfile.getUserUname(data.username);
+          if(checkUname.length>0 && id!=checkUname[0].id){
+            return response(res, 'Username not available', null, 400);
+          }
+        }
+        if(req.body.birthdate){
+          const itsDate = isDate(req.body.birthdate);
+          if(itsDate!=='Invalid Date'){
+            data.birthdate = itsDate;
+          }else{
+            return response(res, 'Invalid date format', null, 400);
+          }
+        }
         const resultUpdate = await usersProfile.updateUser(data, id);
+        console.log(resultUpdate);
         if(resultUpdate.affectedRows>0){
           const resultUpdateUser = await usersProfile.getUser(id);
           if(resultUpdateUser.length===1){
@@ -160,90 +219,12 @@ exports.updateUser = async(req, res)=>{
           return response(res, 'Error: Can\'t update user', null, 500);
         }
       }else{
-        return response(res, 'User not found', null, 404);
-      }
-    }
-  }
-  
-  if(req.user.id==id){
-    const dataName = ['name', 'username', 'email', 'password', 'role', 'phone_number', 'gender', 'birthdate', 'address'];
-
-    const resultId = await usersProfile.getUser(id);
-    if(resultId.length>0){
-      dataName.forEach(x=>{
-        if(req.body[x] || req.body[x]==''){
-          data[x] = req.body[x];
-        }else{
-          data[x] = resultId[0][x];
-        }
-      });
-      const checkType = checkDataType(data, ['phone_number'], ['name']);
-      if(checkType.length>0){
-        return response(res, checkType, null, 400);
-      }
-      if(req.body.password==''){
-        return response(res, 'Please input the password', null, 400);
-      }
-      if(req.body.password){
-        if(req.body.password.length>=6){
-          const salt = await bcrypt.genSalt(10);
-          const password = await bcrypt.hash(data.password, salt);
-          data.password = password;
-        }else{
-          return response(res, 'Password should contain 6 characters and more', null, 400);
-        }
-      }
-    
-      if(data.email){
-        const itsEmail = isEmail(data.email);
-        if(!itsEmail){
-          return response(res, 'Wrong email format!', null, 400);
-        }
-        const checkEmail = await usersProfile.getEmail(data.email);
-        if(checkEmail.length>0 && id!=checkEmail[0].id){
-          return response(res, 'Email has been used', null, 400);
-        }
-      }
-      if(data.phone_number){
-        if(data.phone_number.length<10 || data.phone_number.length>13){
-          return response(res, 'Phone number length should be between 10-13 numbers', null, 400);
-        }
-        const checkPhone = await usersProfile.getPhone(data.phone_number);
-        if(checkPhone.length>0 && id!=checkPhone[0].id){
-          return response(res, 'Phone number has been used', null, 400);
-        }
-      }
-      if(data.username){
-        const checkUname = await usersProfile.getUserUname(data.username);
-        if(checkUname.length>0 && id!=checkUname[0].id){
-          return response(res, 'Username not available', null, 400);
-        }
-      }
-      if(req.body.birthdate){
-        const itsDate = isDate(req.body.birthdate);
-        if(itsDate!=='Invalid Date'){
-          data.birthdate = itsDate;
-        }else{
-          return response(res, 'Invalid date format', null, 400);
-        }
-      }
-      const resultUpdate = await usersProfile.updateUser(data, id);
-      if(resultUpdate.affectedRows>0){
-        const resultUpdateUser = await usersProfile.getUser(id);
-        if(resultUpdateUser.length===1){
-          return response(res, 'Successfully update user data', resultUpdateUser[0]);
-        }else{
-          return response(res, 'Error: Can\'t get updated data', null, 500);
-        }
-      }else{
-        return response(res, 'Error: Can\'t update user', null, 500);
+        return response(res, 'User not found', null, 400);
       }
     }else{
-      return response(res, 'User not found', null, 400);
+      return response(res, 'Unmatch ID', null, 403);
     }
-  }else{
-    return response(res, 'Unmatch ID', null, 403);
-  }
+  });
 };
 
 exports.deleteUser = async(req, res)=>{

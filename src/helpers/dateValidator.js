@@ -77,8 +77,8 @@ const getDateDiff = (dateA, dateB)=>{
 };
 
 const isLessThan = (timeA, timeB)=>{
-  const a = timeA.getTime();
-  const b = timeB.getTime();
+  const a = new Date(timeA).getTime();
+  const b = new Date(timeB).getTime();
   if(a<b){
     return true;
   }else{

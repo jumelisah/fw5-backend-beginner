@@ -6,8 +6,8 @@ const getProfile = (req, res)=>{
     if(result.length>0){
       return res.json({
         success: true,
-        message: `User profile with ID: ${id}`,
-        result: result
+        message: 'User profile',
+        result: result[0]
       });
     }else{
       return res.status(404).send({
