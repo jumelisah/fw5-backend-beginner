@@ -5,6 +5,7 @@ const response = require('../helpers/response');
 const historyModel = require('../models/histasync');
 const vehicleModel = require('../models/vehicles');
 const userModel = require('../models/users');
+const {APP_URL} = process.env;
 
 exports.getHistories = async(req, res)=>{
   if(req.user.role=='admin'){
@@ -46,7 +47,21 @@ exports.getHistory = async(req, res)=>{
 
 exports.getUserHistories = async(req, res)=>{
   const user_id = req.user.id;
-  const historyResult = await historyModel.userHistories(user_id);
+  let {page, limit} = req.query;
+  page = parseInt(page) || 1;
+  limit = parseInt(limit) || 5;
+  const offset = (page-1)*limit;
+  const data = {user_id, page, offset}
+  let url = `${APP_URL}histories/user?`;
+  const historyResult = await historyModel.userHistories(data);
+  const total = await historyModel.userHistoriesTotal(user_id);
+  let last = Math.ceil(total/limit);
+  const pageInfo = {
+    prev: page>1 ? `${url}page=${page-1}&limit=${limit}` : null,
+    next: page<last ? `${url}page=${page+1}&limit=${limit}` : null,
+    currentPage : page,
+    last : last
+  }
   if(historyResult.length>0){
     return response(res, 'Rent History', historyResult);
   }else{
@@ -61,7 +76,7 @@ exports.addHistory = async(req, res)=>{
   const dataName = ['vehicle_id', 'sum', 'rent_date', 'return_date'];
   const dataNumber = ['vehicle_id', 'user_id', 'sum'];
   console.log(data);
-  const itsNull = isNull(data, dataName);
+  const itsNull = isNull(data, dataName); // Check if data is null (itsNull return true or false)
   if(itsNull){
     return response(res, 'Please fill in all the fields', null, 400);
   }
@@ -69,7 +84,7 @@ exports.addHistory = async(req, res)=>{
   if(dataType.length>0){
     return response(res, dataType, null, 400);
   }
-  const itsDate = isDate(rent_date);
+  const itsDate = isDate(rent_date); // Check if date is invalid
   if(itsDate=='Invalid Date'){
     return response(res, itsDate, null, 400);
   }

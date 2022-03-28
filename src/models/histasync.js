@@ -21,8 +21,15 @@ exports.getUser = (user_id)=>new Promise((resolve, reject)=>{
   });
 });
 
-exports.userHistories = (user_id) => new Promise((resolve, reject)=>{
-  db.query(`SELECT * FROM histories WHERE user_id=${user_id}`, (err, res)=>{
+exports.userHistories = (data) => new Promise((resolve, reject)=>{
+  db.query(`SELECT * FROM histories WHERE user_id=${data.user_id} LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
+exports.userHistoriesTotal = (user_id) => new Promise((resolve, reject)=>{
+  db.query(`SELECT COUNT(*) FROM histories WHERE user_id=${user_id}`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });

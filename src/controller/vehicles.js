@@ -2,7 +2,6 @@ const checkDataType = require('../helpers/dataType');
 const isNull = require('../helpers/isNull');
 const response = require('../helpers/response');
 const vehicleModel = require('../models/vehicles');
-const upload = require('../helpers/upload').single('image');
 const {APP_URL} = process.env;
 
 exports.getVehicles = async(req, res)=>{
@@ -105,11 +104,8 @@ exports.getPopularVehicle = async(req, res)=>{
   }
 };
 
-exports.addVehicle = (req, res)=>{
-  upload(req, res, async(err)=>{
-    if(err){
-      return response(res, err.message, null, 400);
-    }
+exports.addVehicle = async (req, res)=>{
+  
     if(req.user.role=='admin'){
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = null;
@@ -148,7 +144,6 @@ exports.addVehicle = (req, res)=>{
     }else{
       return response(res, 'You are unable to do this action', null, 403);
     }
-  });
 };
 
 exports.updateVehicle = (req, res)=>{

@@ -8,7 +8,6 @@ const isEmail = require('../helpers/emailvalidator');
 const isNull = require('../helpers/isNull');
 const checkDataType = require('../helpers/dataType');
 const {isDate, changeDate} = require('../helpers/dateValidator');
-const upload = require('../helpers/upload').single('image');
 
 exports.getUsers = async(req, res)=>{
   let {name, page, limit} = req.query;
