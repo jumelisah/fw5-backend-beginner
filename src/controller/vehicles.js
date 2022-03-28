@@ -146,9 +146,15 @@ exports.addVehicle = async (req, res)=>{
           return response(res, 'Error: Can\'t get data', null, 500);
         }
       }else{
+        if(req.files){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, 'Error: Can\'t add vehicle', null, 500);
       }
     }else{
+      if(req.files){
+        deleteImage(cloudPath(req.files[0].filename));
+      }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch (e) {
