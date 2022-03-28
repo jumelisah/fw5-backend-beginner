@@ -16,7 +16,7 @@ exports.login = async (req, res)=>{
       return response(res, 'Please confirm your account with code we\'ve sent to your email', null, 400);
     }
     const data = {id:checkUser[0].id};
-    if(checkUser[0].role=='Admin'){
+    if(checkUser[0].role=='Admin' || checkUser[0].role=='admin'){
       data.role = 'admin';
     }
     const {password:hash} = checkUser[0];
