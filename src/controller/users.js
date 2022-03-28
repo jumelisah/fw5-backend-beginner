@@ -58,7 +58,7 @@ exports.createUser = async(req, res)=>{
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
-    const data = {name, username, email, password, image};
+    const data = {name, username, email, password, image, role: 'Admin'};
     const dataName = ['name', 'username', 'email', 'password'];
     const itsNull = isNull(data, dataName);
     if(itsNull){
@@ -121,11 +121,11 @@ exports.createUser = async(req, res)=>{
   }
 };
 
-exports.updateUser = (req, res)=>{
-  upload(req, res, async(err)=>{
-    if(err){
-      return response(res, err.message, null, 400,);
-    }
+exports.updateUser = async(req, res)=>{
+  // upload(req, res, async(err)=>{
+    // if(err){
+    //   return response(res, err.message, null, 400,);
+    // }
     let {id} = req.params;
     if(!id){
       id=req.user.id;
@@ -223,7 +223,7 @@ exports.updateUser = (req, res)=>{
     }else{
       return response(res, 'Unmatch ID', null, 403);
     }
-  });
+  // });
 };
 
 exports.deleteUser = async(req, res)=>{
