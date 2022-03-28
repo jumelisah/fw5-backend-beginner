@@ -122,10 +122,7 @@ exports.createUser = async(req, res)=>{
 };
 
 exports.updateUser = async(req, res)=>{
-  // upload(req, res, async(err)=>{
-    // if(err){
-    //   return response(res, err.message, null, 400,);
-    // }
+  try{
     let {id} = req.params;
     if(!id){
       id=req.user.id;
@@ -223,7 +220,9 @@ exports.updateUser = async(req, res)=>{
     }else{
       return response(res, 'Unmatch ID', null, 403);
     }
-  // });
+  } catch (e) {
+    return response(res, 'Error', e, 400);
+  }
 };
 
 exports.deleteUser = async(req, res)=>{
