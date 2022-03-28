@@ -1,4 +1,5 @@
 const checkDataType = require('../helpers/dataType');
+const { deleteImage, cloudPath } = require('../helpers/deleteImage');
 const isNull = require('../helpers/isNull');
 const response = require('../helpers/response');
 const vehicleModel = require('../models/vehicles');
@@ -105,13 +106,13 @@ exports.getPopularVehicle = async(req, res)=>{
 };
 
 exports.addVehicle = async (req, res)=>{
-  
+  try {
     if(req.user.role=='admin'){
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = null;
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
-      if(req.file){
-        image = `${APP_URL}${req.file.destination}${req.file.filename}`;
+      if(req.files){
+        image = req.files[0].path;
         data.image = image;
       }
       console.log(data.image);
@@ -121,6 +122,9 @@ exports.addVehicle = async (req, res)=>{
       const itsNull = isNull(data, dataName);
       const checkType = checkDataType(data, dataNumber, dataString);
       if(itsNull){
+        if(req.files){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, 'Please fill in all the fields.', null, 400);
       }
       if(checkType.length>0){
@@ -128,6 +132,9 @@ exports.addVehicle = async (req, res)=>{
       }
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0){
+        if(req.files){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, 'Vehicle already on the list', null, 400);
       }
       const addResult = await vehicleModel.addVehicle(data);
@@ -144,20 +151,23 @@ exports.addVehicle = async (req, res)=>{
     }else{
       return response(res, 'You are unable to do this action', null, 403);
     }
+  } catch (e) {
+    if(req.files){
+      deleteImage(cloudPath(req.files[0].filename));
+    }
+    return response(res, e, null, 500);
+  }
 };
 
-exports.updateVehicle = (req, res)=>{
-  upload(req, res, async(err)=>{
-    if(err){
-      return response(res, err.message, null, 400);
-    }
+exports.updateVehicle = async(req, res)=>{
+  try{
     const {id} = req.params;
     if(req.user.role=='admin'){
       const data = {};
       let image ='';
       console.log(req.file);
-      if(req.file){
-        image = `${APP_URL}${req.file.destination}${req.file.filename}`;
+      if(req.files){
+        image = req.files[0].path;
         data.image = image;
       }
       const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
@@ -167,6 +177,9 @@ exports.updateVehicle = (req, res)=>{
         return response(res, 'Please input the ID first!', null, 400);
       }
       if(id<1){
+        if(req.files){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, 'ID should be a number greater than 0', null, 400);
       }
       const checkType = checkDataType(data, dataNumber, dataString);
@@ -175,6 +188,9 @@ exports.updateVehicle = (req, res)=>{
       }
       const resultId = await vehicleModel.getVehicle(id);
       if(resultId.length<1){
+        if(req.files){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, `Vehicle with ID=${id} not found`, null, 404);
       }
       dataName.forEach(x=>{
@@ -189,6 +205,9 @@ exports.updateVehicle = (req, res)=>{
       });
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
+        if(req.files){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, 'Vehicle already on the list', null, 400);
       }
       const updateResult = await vehicleModel.updateVehicle(data, id);
@@ -199,30 +218,46 @@ exports.updateVehicle = (req, res)=>{
         }
       }
     }else{
+      if(req.files){
+        deleteImage(cloudPath(req.files[0].filename));
+      }
       return response(res, 'You are unable to do this action', null, 403);
     }
-  });
+  } catch(e) {
+    if(req.files){
+      deleteImage(cloudPath(req.files[0].filename));
+    }
+    return response(res, 'Error', e ? e: null, 400);
+  }
 };
 
 exports.deleteVehicle = async(req, res)=>{
-  if(req.user.role=='admin'){
-    const {id} = req.params;
-    if(id==null || id==undefined || id==''){
-      return response(res, 'Please input the ID first!', null, 400);
-    }
-    if(id<1){
-      return response(res, 'ID should be a number greater than 0', null, 400);
-    }  
-    const resultId = await vehicleModel.getVehicle(id);
-    if(resultId.length>0){
-      const deleteResult = await vehicleModel.deleteVehicle(id);
-      if(deleteResult.affectedRows>0){
-        return response(res, 'Successfully deleted vehicle', resultId[0]);
+  try{
+    if(req.user.role=='admin'){
+      const {id} = req.params;
+      if(id==null || id==undefined || id==''){
+        return response(res, 'Please input the ID first!', null, 400);
+      }
+      if(id<1){
+        return response(res, 'ID should be a number greater than 0', null, 400);
+      }  
+      const resultId = await vehicleModel.getVehicle(id);
+      if(resultId.length>0){
+        if(resultId[0].image!==''){
+          deleteImage(cloudPath(resultId[0].image));
+        }
+        const deleteResult = await vehicleModel.deleteVehicle(id);
+        if(deleteResult.affectedRows>0){
+          
+          return response(res, 'Successfully deleted vehicle', resultId[0]);
+        }
+      }else{
+        return response(res, `Vehicle with ID=${id} not found`, null, 404);
       }
     }else{
-      return response(res, `Vehicle with ID=${id} not found`, null, 404);
+      return response(res, 'You are unable to do this action', null, 403);
     }
-  }else{
-    return response(res, 'You are unable to do this action', null, 403);
+  } catch (e) {
+    return response(res, 'Error', e, 500);
   }
 };
