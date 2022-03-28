@@ -58,7 +58,7 @@ exports.createUser = async(req, res)=>{
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
-    const data = {name, username, email, password, image, role: 'Admin'};
+    const data = {name, username, email, password, image};
     const dataName = ['name', 'username', 'email', 'password'];
     const itsNull = isNull(data, dataName);
     if(itsNull){
