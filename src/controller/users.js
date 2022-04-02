@@ -53,22 +53,22 @@ exports.getUser = async(req, res)=>{
 };
 
 exports.createUser = async(req, res)=>{
-  const {name, username, email, password: rawPassword, confirmPassword} = req.body;
-  const image = `${APP_URL}uploads/Profile-default.png`;
+  const {username, email, password: rawPassword, confirmPassword} = req.body;
+  // const image = `${APP_URL}uploads/Profile-default.png`;
   console.log(req.body.confirmPassword);
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
-    const data = {name, username, email, password, image, role: 'Admin'};
-    const dataName = ['name', 'username', 'email', 'password'];
+    const data = {username, email, password};
+    const dataName = ['username', 'email', 'password'];
     const itsNull = isNull(data, dataName);
     if(itsNull){
       return response(res, 'Please fill in all the fields.', null, 400);
     }
   
-    if(!isNaN(name)){
-      return response(res, 'Name should be a STRING!', null, 400);
-    }
+    // if(!isNaN(name)){
+    //   return response(res, 'Name should be a STRING!', null, 400);
+    // }
     if(rawPassword!==confirmPassword){
       return response(res, 'Passwords not match', null, 400);
     }
@@ -111,7 +111,6 @@ exports.createUser = async(req, res)=>{
       text: String(randomCode),
       html: `Here's the code you need to confirm your account: <b>${randomCode}</b>`
     });
-    console.log('yai', info);
     if(info){
       return response(res, 'Register success. We\'ve sent confirmation code to your email.', null);
     }else{
