@@ -133,7 +133,7 @@ exports.updateUser = async(req, res)=>{
     let image = '';
     const data = {};
     if(req.files){
-      image = req.file[0].path;
+      image = req.files[0].path;
       data.image = image;
     }
     if(id==null || id==undefined || id==''){
