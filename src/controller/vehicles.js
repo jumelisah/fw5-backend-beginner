@@ -169,6 +169,7 @@ exports.updateVehicle = async(req, res)=>{
   try{
     const {id} = req.params;
     console.log(id);
+    console.log(req.user.role);
     if(req.user.role=='admin'){
       const data = {};
       let image ='';
@@ -177,6 +178,7 @@ exports.updateVehicle = async(req, res)=>{
         image = req.files[0].path;
         data.image = image;
       }
+      console.log(req.files);
       const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
@@ -190,6 +192,7 @@ exports.updateVehicle = async(req, res)=>{
         return response(res, 'ID should be a number greater than 0', null, 400);
       }
       const checkType = checkDataType(data, dataNumber, dataString);
+      console.log(checkType);
       if(checkType.length>0){
         return response(res, checkType, null, 400);
       }
