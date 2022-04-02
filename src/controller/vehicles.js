@@ -174,7 +174,7 @@ exports.updateVehicle = async(req, res)=>{
       const data = {};
       let image ='';
       console.log(req.files);
-      if(req.files){
+      if(req.files.length>0){
         image = req.files[0].path;
         data.image = image;
       }
