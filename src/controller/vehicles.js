@@ -232,9 +232,9 @@ exports.updateVehicle = async(req, res)=>{
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch {
-    if(req.files){
-      deleteImage(cloudPath(req.files[0].filename));
-    }
+    // if(req.files){
+    //   deleteImage(cloudPath(req.files[0]?.filename));
+    // }
     return response(res, 'Unexpected Error', 400);
   }
 };
