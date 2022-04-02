@@ -168,6 +168,7 @@ exports.addVehicle = async (req, res)=>{
 exports.updateVehicle = async(req, res)=>{
   try{
     const {id} = req.params;
+    console.log(id);
     if(req.user.role=='admin'){
       const data = {};
       let image ='';
@@ -209,6 +210,7 @@ exports.updateVehicle = async(req, res)=>{
           data.image = resultId[0].image;
         }
       });
+      console.log(data);
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
         return response(res, 'Vehicle already on the list', null, 400);
