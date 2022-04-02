@@ -54,13 +54,13 @@ exports.getUser = async(req, res)=>{
 
 exports.createUser = async(req, res)=>{
   const {username, email, password: rawPassword, confirmPassword} = req.body;
-  // const image = `${APP_URL}uploads/Profile-default.png`;
+  const image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648876041/SERAN/uploads/users/default-user_cyzz1x.png';
   console.log(req.body.confirmPassword);
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
-    const data = {username, email, password};
-    const dataName = ['username', 'email', 'password'];
+    const data = {username, email, password, image};
+    const dataName = ['username', 'email', 'password', 'image'];
     const itsNull = isNull(data, dataName);
     if(itsNull){
       return response(res, 'Please fill in all the fields.', null, 400);
