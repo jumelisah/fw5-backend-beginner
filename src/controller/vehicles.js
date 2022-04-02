@@ -168,7 +168,7 @@ exports.addVehicle = async (req, res)=>{
 exports.updateVehicle = async(req, res)=>{
   try{
     const {id} = req.params;
-    console.log(id);
+    console.log(id, 0);
     console.log(req.user.role);
     if(req.user.role=='admin'){
       const data = {};
@@ -182,13 +182,16 @@ exports.updateVehicle = async(req, res)=>{
       const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
+      console.log(id, 1)
       if(id==null || id==undefined || id==''){
+        console.log(id, 2)
         return response(res, 'Please input the ID first!', null, 400);
       }
       if(id<1){
         // if(req.files){
         //   deleteImage(cloudPath(req.files[0].filename));
         // }
+        console.log(id, 3)
         return response(res, 'ID should be a number greater than 0', null, 400);
       }
       const checkType = checkDataType(data, dataNumber, dataString);
