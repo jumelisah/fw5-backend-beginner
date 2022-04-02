@@ -211,9 +211,6 @@ exports.updateVehicle = async(req, res)=>{
       });
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
-        if(req.files){
-          deleteImage(cloudPath(req.files[0].filename));
-        }
         return response(res, 'Vehicle already on the list', null, 400);
       }
       const updateResult = await vehicleModel.updateVehicle(data, id);
@@ -229,11 +226,11 @@ exports.updateVehicle = async(req, res)=>{
       }
       return response(res, 'You are unable to do this action', null, 403);
     }
-  } catch(e) {
+  } catch {
     if(req.files){
       deleteImage(cloudPath(req.files[0].filename));
     }
-    return response(res, 'Error', e ? e: null, 400);
+    return response(res, 'Unexpected Error', 400);
   }
 };
 
