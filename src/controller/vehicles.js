@@ -173,7 +173,7 @@ exports.updateVehicle = async(req, res)=>{
     if(req.user.role=='admin'){
       const data = {};
       let image ='';
-      console.log(req.file);
+      console.log(req.files);
       if(req.files){
         image = req.files[0].path;
         data.image = image;
