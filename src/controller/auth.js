@@ -36,7 +36,7 @@ exports.changePassword = async (req, res) => {
   try{
     const {password, newPassword, repeatPassword} = req.body;
     if(newPassword!==repeatPassword){
-      return response(res, 'Password not match');
+      return response(res, 'Password not match', null, 400);
     }
     console.log('apaa')
     const user = await userModel.getUser(req.user.id);
@@ -49,7 +49,7 @@ exports.changePassword = async (req, res) => {
     console.log('salah')
     const passwordCompare = await bcrypt.compare(password, hash);
     if(!passwordCompare){
-      return response(res, 'Wrong Password');
+      return response(res, 'Wrong Password', null, 400);
     }
     const salt = await bcrypt.genSalt(10);
     const setNewPassword = await bcrypt.hash(newPassword, salt);
