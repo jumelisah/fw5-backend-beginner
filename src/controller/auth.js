@@ -38,8 +38,15 @@ exports.changePassword = async (req, res) => {
     if(newPassword!==repeatPassword){
       return response(res, 'Password not match');
     }
+    console.log('apaa')
     const user = await userModel.getUser(req.user.id);
+    if(user.length >= 1) {
+      console.log('disini 1')
+    }
+    console.log(user)
+    console.log('user')
     const {password:hash} = user[0];
+    console.log('salah')
     const passwordCompare = await bcrypt.compare(password, hash);
     if(!passwordCompare){
       return response(res, 'Wrong Password');
