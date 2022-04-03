@@ -109,12 +109,12 @@ exports.addVehicle = async (req, res)=>{
   try {
     if(req.user.role=='admin'){
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
-      let image = null;
+      let image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648976801/SERAN/uploads/vehicles/Untitled_design_5_qmu2q7.png';
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
       if(req.files){
         image = req.files[0].path;
-        data.image = image;
       }
+      data.image = image;
       console.log(data.image);
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
