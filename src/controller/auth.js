@@ -1,6 +1,6 @@
 const response = require('../helpers/response');
 const userAuth = require('../models/auth');
-// const userModel = require('../models/users');
+const userModel = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const mail = require('../helpers/mail');
@@ -29,6 +29,31 @@ exports.login = async (req, res)=>{
     }
   }else{
     return response(res, 'Username or email not registered', null, 400);
+  }
+};
+
+exports.changePassword = async (req, res) => {
+  try{
+    const {password, newPassword, repeatPassword} = req.body;
+    if(newPassword!==repeatPassword){
+      return response(res, 'Password not match');
+    }
+    const user = await userModel.getUser(req.user.id);
+    const {password:hash} = user[0];
+    const passwordCompare = await bcrypt.compare(password, hash);
+    if(!passwordCompare){
+      return response(res, 'Wrong Password');
+    }
+    const salt = await bcrypt.genSalt(10);
+    const setNewPassword = await bcrypt.hash(newPassword, salt);
+    const data = {password: setNewPassword};
+    const editPassword = await userModel.updateUser(data, req.user.id);
+    if(editPassword.affectedRows < 1) {
+      return response(res, 'Unexpected error', null, 500);
+    }
+    return response(res, 'Password has been changed');
+  } catch {
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
