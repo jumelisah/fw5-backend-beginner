@@ -8,22 +8,29 @@ const userModel = require('../models/users');
 const {APP_URL} = process.env;
 
 exports.getHistories = async(req, res)=>{
-  if(req.user.role=='admin'){
-    let {vehicle_name, page, limit} = req.query;
-    vehicle_name = vehicle_name || '';
-    page = parseInt(page) || 1;
-    limit = parseInt(limit) || 5;
-    const offset = (page-1)*limit;
-    const data = {vehicle_name, page, limit, offset};
-    console.log(data);
-    const historiesResult = await historyModel.getHistories(data);
-    if(historiesResult.length>0){
-      return response(res, 'List of histories', historiesResult);
+  try{
+    if(req.user.role=='admin'){
+      console.log(req.user.role);
+      let {vehicle_name, page, limit} = req.query;
+      vehicle_name = vehicle_name || '';
+      page = parseInt(page) || 1;
+      limit = parseInt(limit) || 5;
+      const offset = (page-1)*limit;
+      const data = {vehicle_name, page, limit, offset};
+      console.log(data)
+      console.log(data);
+      const historiesResult = await historyModel.getHistories(data);
+      console.log(historiesResult);
+      if(historiesResult.length>0){
+        return response(res, 'List of histories', historiesResult);
+      }else{
+        return response(res, 'History not found', null);
+      }
     }else{
-      return response(res, 'History not found', null);
+      return response(res, 'You are not allow to see this page', null, 403);
     }
-  }else{
-    return response(res, 'You are not allow to see this page', null, 403);
+  } catch {
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
