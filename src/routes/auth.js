@@ -4,7 +4,7 @@ const {login, forgotPassword, confirmAccount, changePassword} = require('../cont
 
 auth.post('/login', login);
 auth.post('/forgot-password', forgotPassword);
-auth.post('/change-password', changePassword);
+auth.patch('/change-password', changePassword);
 auth.post('/account-confirmation', confirmAccount);
 
 module.exports = auth;
