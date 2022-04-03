@@ -46,26 +46,31 @@ exports.getHistory = async(req, res)=>{
 };
 
 exports.getUserHistories = async(req, res)=>{
-  const user_id = req.user.id;
-  let {page, limit} = req.query;
-  page = parseInt(page) || 1;
-  limit = parseInt(limit) || 5;
-  const offset = (page-1)*limit;
-  const data = {user_id, page, offset}
-  let url = `${APP_URL}histories/user?`;
-  const historyResult = await historyModel.userHistories(data);
-  const total = await historyModel.userHistoriesTotal(user_id);
-  let last = Math.ceil(total/limit);
-  const pageInfo = {
-    prev: page>1 ? `${url}page=${page-1}&limit=${limit}` : null,
-    next: page<last ? `${url}page=${page+1}&limit=${limit}` : null,
-    currentPage : page,
-    last : last
-  }
-  if(historyResult.length>0){
-    return response(res, 'Rent History', historyResult);
-  }else{
-    return response(res, 'History not found', null, 404);
+  try {
+    const user_id = req.user.id;
+    console.log(user_id)
+    let {page, limit} = req.query;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 5;
+    const offset = (page-1)*limit;
+    const data = {user_id, limit, page, offset}
+    let url = `${APP_URL}histories/user?`;
+    const historyResult = await historyModel.userHistories(data);
+    const total = await historyModel.userHistoriesTotal(user_id);
+    let last = Math.ceil(total/limit);
+    const pageInfo = {
+      prev: page>1 ? `${url}page=${page-1}&limit=${limit}` : null,
+      next: page<last ? `${url}page=${page+1}&limit=${limit}` : null,
+      currentPage : page,
+      last : last
+    };
+    if(historyResult.length>0){
+      return response(res, 'Rent History', [historyResult,pageInfo]);
+    }else{
+      return response(res, 'History not found', null, 404);
+    }
+  } catch {
+    return response(res, 'Unexpected error',null, 500);
   }
 };
 
