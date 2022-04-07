@@ -10,17 +10,13 @@ const {APP_URL} = process.env;
 exports.getHistories = async(req, res)=>{
   try{
     if(req.user.role=='admin'){
-      console.log(req.user.role);
       let {vehicle_name, page, limit} = req.query;
       vehicle_name = vehicle_name || '';
       page = parseInt(page) || 1;
       limit = parseInt(limit) || 5;
       const offset = (page-1)*limit;
       const data = {vehicle_name, page, limit, offset};
-      console.log(data)
-      console.log(data);
       const historiesResult = await historyModel.getHistories(data);
-      console.log(historiesResult);
       if(historiesResult.length>0){
         return response(res, 'List of histories', historiesResult);
       }else{
@@ -55,12 +51,11 @@ exports.getHistory = async(req, res)=>{
 exports.getUserHistories = async(req, res)=>{
   try {
     const user_id = req.user.id;
-    console.log(user_id)
     let {page, limit} = req.query;
     page = parseInt(page) || 1;
     limit = parseInt(limit) || 5;
     const offset = (page-1)*limit;
-    const data = {user_id, limit, page, offset}
+    const data = {user_id, limit, page, offset};
     let url = `${APP_URL}histories/user?`;
     const historyResult = await historyModel.userHistories(data);
     const total = await historyModel.userHistoriesTotal(user_id);
@@ -84,12 +79,10 @@ exports.getUserHistories = async(req, res)=>{
 exports.addHistory = async(req, res)=>{
   try {
     const user_id = req.user.id;
-    console.log(user_id, 11)
     const {vehicle_id, sum, rent_date, return_date} = req.body;
     const data = {vehicle_id, user_id, sum, rent_date, return_date};
     const dataName = ['vehicle_id', 'sum', 'rent_date', 'return_date'];
     const dataNumber = ['vehicle_id', 'user_id', 'sum'];
-    console.log(data, 10);
     const itsNull = isNull(data, dataName); // Check if data is null (itsNull return true or false)
     if(itsNull){
       return response(res, 'Please fill in all the fields', null, 400);
@@ -111,9 +104,7 @@ exports.addHistory = async(req, res)=>{
     if(lessThanToday || diffToday<1){
       return response(res, 'Reservation should be made at least 1 day before rent date', null, 400);
     }
-    console.log(lessThanToday, diffToday);
     const itsLessThan = isLessThan(rent_date, return_date); //Check if rent date less than return date
-    console.log(itsLessThan, '9');
     if(!itsLessThan){
       return response(res, 'Rent date should be earlier than return date!', null, 400);
     }
@@ -125,17 +116,14 @@ exports.addHistory = async(req, res)=>{
     data.return_date = changeDate(return_date);
     const dateDiff = dateDifference(rent_date, return_date);
     const userBook = await historyModel.getUser(user_id);
-    console.log(userBook, '8');
     if(userBook.length>1){
       return response(res, 'You has pass rent limit. Please finish or cancel your past transaction first', null, 400);
     }
     const getVehicle = await vehicleModel.getVehicle(vehicle_id);
-    console.log(getVehicle, '7');
     if(getVehicle.length<1){
       return response(res, 'Vehicle not found', null, 404);
     }
     const checkAvailable = await historyModel.getVehicleAvailable(data);
-    console.log(checkAvailable, '6');
     let stock = checkAvailable.length+getVehicle[0].qty;
     if(stock<1){
       return response(res, 'Vehicle not available at the moment', null, 400);
@@ -147,24 +135,19 @@ exports.addHistory = async(req, res)=>{
       return response(res, `Maximal order: ${stock} vehicles`, null, 400);
     }
     data.total_cost = getVehicle[0].cost*sum*dateDiff;
-    console.log(data, '5');
     data.prepayment = 0;
     if(getVehicle[0].prepayment=='Prepayment'){
       data.prepayment = data.total_cost/2;
     }
     const addResult = await historyModel.addHistory(data);
-    console.log(addResult, '4');
     if(addResult.affectedRows<1){
       return response(res, 'Cant do the reservation', null, 500);
     }
     const changeQty = await historyModel.updateQtyMin(getVehicle[0].id, data.sum);
-    console.log(changeQty, '3');
     if(changeQty.affectedRows<1){
       return response(res, 'Server error', null, 500);
     }
-    console.log(addResult), '2';
     const getNewHist = await historyModel.getHistory(addResult.insertId);
-    console.log(getNewHist, '1');
     if(getNewHist.length<1){
       return response(res, 'Server error', null, 500);
     }
