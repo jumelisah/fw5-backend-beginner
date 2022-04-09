@@ -93,11 +93,13 @@ const editProfile = async (req, res) => {
       }
     }
     if(req.body.birthdate){
+      console.log(req.body.birthdate);
       const itsDate = isDate(req.body.birthdate);
+      console.log(itsDate);
       if(itsDate!=='Invalid Date'){
         data.birthdate = itsDate;
       }else{
-        if(req.files){
+        if(req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Invalid date format', null, 400);

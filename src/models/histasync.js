@@ -22,7 +22,7 @@ exports.getUser = (user_id)=>new Promise((resolve, reject)=>{
 });
 
 exports.userHistories = (data) => new Promise((resolve, reject)=>{
-  db.query(`SELECT h.id, v.name AS vehicle, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE user_id=${data.user_id} LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
+  db.query(`SELECT h.id, v.name AS vehicle, v.image AS image, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE user_id=${data.user_id} LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
@@ -36,7 +36,7 @@ exports.userHistoriesTotal = (user_id) => new Promise((resolve, reject)=>{
 });
 
 exports.addHistory = (data)=>new Promise((resolve, reject)=>{
-  db.query(`INSERT INTO histories (vehicle_id, user_id, sum, total_cost, prepayment, rent_date, return_date) VALUES(${data.vehicle_id}, ${data.user_id}, ${data.sum}, ${data.total_cost}, ${data.prepayment}, ${data.rent_date}, ${data.return_date})`, (err, res)=>{
+  db.query(`INSERT INTO histories (vehicle_id, user_id, sum, total_cost, prepayment, rent_date, return_date, recipient, address, phone_number, email) VALUES(${data.vehicle_id}, ${data.user_id}, ${data.sum}, ${data.total_cost}, ${data.prepayment}, ${data.rent_date}, ${data.return_date}, '${data.recipient}', '${data.address}', '${data.phone_number}', '${data.email}')`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
