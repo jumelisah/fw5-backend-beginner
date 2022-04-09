@@ -250,8 +250,8 @@ exports.updateHistory = async(req, res)=>{
   }
 };
 
-exports.deleteHistory = async(req, res)=>{
-  if(req.user.role=='admin'){
+exports.deleteHistoryUser = async(req, res)=>{
+  try {
     const {id} = req.params;
     if(id==null || id==undefined || id==''){
       return response(res, 'Undefined ID', null, 400);
@@ -260,11 +260,14 @@ exports.deleteHistory = async(req, res)=>{
     if(historyResult.length<1){
       return response(res, `History with ID: ${id} not found`, null, 404);
     }
-    const deleteResult = await historyModel.deleteHistory(id);
+    if (req.user.id!==historyResult[0].user_id) {
+      return response(res, 'You are not allow to do this action', null, 403);
+    }
+    const deleteResult = await historyModel.deleteHistoryUser(id);
     if(deleteResult.affectedRows>0){
       return response(res, 'Successfully delete history', historyResult[0]);
     }
-  }else{
-    return response(res, 'You are not allow to do this action', null, 403);
+  } catch {
+    return response(res, 'Unexpected Error', null, 500);
   }
 };
