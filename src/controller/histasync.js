@@ -79,9 +79,9 @@ exports.getUserHistories = async(req, res)=>{
 exports.addHistory = async(req, res)=>{
   try {
     const user_id = req.user.id;
-    const {vehicle_id, sum, rent_date, return_date} = req.body;
-    const data = {vehicle_id, user_id, sum, rent_date, return_date};
-    const dataName = ['vehicle_id', 'sum', 'rent_date', 'return_date'];
+    const {vehicle_id, sum, rent_date, return_date, recipient, email, address, phone_number} = req.body;
+    const data = {vehicle_id, user_id, sum, rent_date, return_date, recipient, email, address, phone_number};
+    const dataName = ['vehicle_id', 'sum', 'rent_date', 'return_date', 'recipient', 'address', 'email','phone_number'];
     const dataNumber = ['vehicle_id', 'user_id', 'sum'];
     const itsNull = isNull(data, dataName); // Check if data is null (itsNull return true or false)
     if(itsNull){
