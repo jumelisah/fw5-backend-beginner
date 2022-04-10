@@ -111,7 +111,8 @@ exports.addVehicle = async (req, res)=>{
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648980071/SERAN/uploads/vehicles/Untitled_design_4_pus3lj.png';
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
-      if(req.files){
+      console.log(data, '1');
+      if(req.files || req.files.length > 0){
         image = req.files[0].path;
       }
       data.image = image;
@@ -121,23 +122,28 @@ exports.addVehicle = async (req, res)=>{
       const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
       const itsNull = isNull(data, dataName);
       const checkType = checkDataType(data, dataNumber, dataString);
+      console.log(2);
       if(itsNull){
-        if(req.files){
+        if(req.files || req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Please fill in all the fields.', null, 400);
       }
+      console.log(3);
       if(checkType.length>0){
         return response(res, checkType, null, 400);
       }
+      console.log(4);
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0){
-        if(req.files){
+        if(req.files || req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Vehicle already on the list', null, 400);
       }
+      console.log(5);
       const addResult = await vehicleModel.addVehicle(data);
+      console.log(6);
       if(addResult.affectedRows>0){
         const resultId = await vehicleModel.getVehicle(addResult.insertId);
         if(resultId.length===1){
@@ -146,19 +152,19 @@ exports.addVehicle = async (req, res)=>{
           return response(res, 'Error: Can\'t get data', null, 500);
         }
       }else{
-        if(req.files){
+        if(req.files || req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Error: Can\'t add vehicle', null, 500);
       }
     }else{
-      if(req.files){
+      if(req.files || req.files.length > 0){
         deleteImage(cloudPath(req.files[0].filename));
       }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch (e) {
-    if(req.files){
+    if(req.files || req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
     return response(res, e, null, 500);
