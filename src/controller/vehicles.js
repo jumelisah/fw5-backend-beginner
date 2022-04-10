@@ -107,6 +107,7 @@ exports.getPopularVehicle = async(req, res)=>{
 
 exports.addVehicle = async (req, res)=>{
   try {
+    console.log(req.user.role);
     if(req.user.role=='admin'){
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648980071/SERAN/uploads/vehicles/Untitled_design_4_pus3lj.png';
@@ -169,7 +170,7 @@ exports.addVehicle = async (req, res)=>{
     if(req.files || req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
-    return response(res, e, null, 500);
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
