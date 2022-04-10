@@ -8,7 +8,7 @@ exports.getHistories = (data)=>new Promise((resolve, reject)=>{
 });
 
 exports.getHistory = (id)=>new Promise((resolve, reject)=>{
-  db.query('SELECT h.id, v.name AS vehicle, u.id AS user_id, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status, delete_by_user, delete_by_admin FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE h.id = ?', [id], (err,res)=>{
+  db.query('SELECT h.id, v.id AS vehicle_id, v.name AS vehicle, u.id AS user_id, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status, delete_by_user, delete_by_admin FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE h.id = ?', [id], (err,res)=>{
     if(err) reject(err);
     resolve(res);
   });
