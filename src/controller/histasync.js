@@ -158,11 +158,39 @@ exports.addHistory = async(req, res)=>{
   }
 };
 
+exports.editHistoryStatus = async (req, res) => {
+  try{
+    const {id} = req.params;
+    const getResult = await historyModel.getHistory(id);
+    if (getResult.length < 1) {
+      return response(res, 'History not found');
+    }
+    if (getResult[0].user_id !== req.user.id) {
+      return response (res, 'Unauthorized', null, 403);
+    }
+    const resultUpdate = await historyModel.updateHistory({status: req.body.status}, id);
+    if (resultUpdate.affectedRows < 1) {
+      return response(res, 'Unexpected error', null, 500);
+    }
+    if (req.body.status === 4 || req.body.status === 'Cancelled') {
+      const changeQty = await historyModel.updateVehicle(getResult[0].vehicle_id);
+      if (changeQty.affectedRows < 1) {
+        return response(res, 'Unexpected error', null, 500);
+      }
+    }
+    const updatedData = await historyModel.getHistory(id);
+    return response(res, 'Transaction was updated', updatedData, 200);
+
+  }catch{
+    return response(res, 'Unexpected error', null, 500);
+  }
+};
+
 exports.updateHistory = async(req, res)=>{
-  if(req.user.role=='admin'){
+  try {
     const {id} = req.params;
     const data = {};
-    const dataName = ['vehicle_id', 'user_id', 'cost', 'costAfterDiscount', 'prepayment', 'remain_payment', 'status', 'rent_date', 'return_date'];
+    const dataName = ['vehicle_id', 'user_id', 'cost', 'prepayment', 'status', 'rent_date', 'return_date'];
     const getResult = await historyModel.getHistory(id);
     if(getResult.length<1){
       return response(res, 'History not found');
@@ -246,8 +274,8 @@ exports.updateHistory = async(req, res)=>{
       }
   
     }
-  }else{
-    return response(res, 'You are not allow to do this action', null, 403);
+  }catch{
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
