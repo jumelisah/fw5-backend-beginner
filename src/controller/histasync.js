@@ -300,3 +300,25 @@ exports.deleteHistoryUser = async(req, res)=>{
     return response(res, 'Unexpected Error', null, 500);
   }
 };
+
+exports.deleteHistoryAdmin = async(req, res)=>{
+  try {
+    if (req.user.role !== 'admin') {
+      return response(res, 'Unauthorized', null, 403);
+    }
+    const {id} = req.params;
+    if(id==null || id==undefined || id==''){
+      return response(res, 'Undefined ID', null, 400);
+    }
+    const historyResult = await historyModel.getHistory(id);
+    if(historyResult.length<1){
+      return response(res, `History with ID: ${id} not found`, null, 404);
+    }
+    const deleteResult = await historyModel.deleteHistoryAdmin(id);
+    if(deleteResult.affectedRows>0){
+      return response(res, 'Successfully delete history', historyResult[0]);
+    }
+  } catch {
+    return response(res, 'Unexpected Error', null, 500);
+  }
+};

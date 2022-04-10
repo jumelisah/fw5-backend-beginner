@@ -76,3 +76,10 @@ exports.deleteHistoryUser = (id)=>new Promise((resolve, reject)=>{
     resolve(res);
   });
 });
+
+exports.deleteHistoryAdmin = (id)=>new Promise((resolve, reject)=>{
+  db.query('UPDATE histories SET delete_by_admin=1 WHERE id=?', [id], (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
