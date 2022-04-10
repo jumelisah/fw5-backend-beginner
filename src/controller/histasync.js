@@ -71,7 +71,8 @@ exports.getUserHistories = async(req, res)=>{
     }else{
       return response(res, 'History not found', null, 404);
     }
-  } catch {
+  } catch (e) {
+    console.log(e);
     return response(res, 'Unexpected error',null, 500);
   }
 };
@@ -152,7 +153,7 @@ exports.addHistory = async(req, res)=>{
       return response(res, 'Server error', null, 500);
     }
     return response(res, 'Successfully made reservation', getNewHist[0]);
-  } catch {
+  } catch{
     return response(res, 'Unexpected error',null, 500);
   }
 };
