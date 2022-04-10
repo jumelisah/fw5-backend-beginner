@@ -1,7 +1,7 @@
 const db = require('../helpers/db');
 
 exports.popularList = (data, cb)=>{
-  db.query(`SELECT v.id AS id, v.name AS name, v.image AS image, v.location AS location, v.cost AS cost, COUNT(h.vehicle_id) AS totalRent FROM vehicles v LEFT JOIN histories h ON v.id=h.vehicle_id WHERE (v.qty>0 OR (DATE('${data.setRentDate}')<DATE(h.rent_date) OR DATE('${data.setRentDate}')>DATE(h.return_date))) AND name LIKE '%${data.name}%' AND v.category_id LIKE '%${data.category}%' AND v.location LIKE '%${data.location}%' AND v.cost>=${data.cost_min} AND v.cost<=${data.cost_max} AND v.type LIKE '%${data.type}%' GROUP BY v.id ORDER BY ${data.sortBy} LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
+  db.query(`SELECT v.id AS id, v.name AS name, v.image AS image, v.location AS location, v.seat AS seat, v.qty AS qty, v.cost AS cost, COUNT(h.vehicle_id) AS totalRent FROM vehicles v LEFT JOIN histories h ON v.id=h.vehicle_id WHERE (v.qty>0 OR (DATE('${data.setRentDate}')<DATE(h.rent_date) OR DATE('${data.setRentDate}')>DATE(h.return_date))) AND name LIKE '%${data.name}%' AND v.category_id LIKE '%${data.category}%' AND v.location LIKE '%${data.location}%' AND v.cost>=${data.cost_min} AND v.cost<=${data.cost_max} AND v.type LIKE '%${data.type}%' GROUP BY v.id ORDER BY ${data.sortBy} LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
     if(err) throw err;
     cb(res);
   });
