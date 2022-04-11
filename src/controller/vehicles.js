@@ -265,8 +265,8 @@ exports.deleteVehicle = async(req, res)=>{
         // }
         const deleteResult = await vehicleModel.deleteVehicle(id);
         if(deleteResult.affectedRows>0){
-          
-          return response(res, 'Successfully deleted vehicle', resultId[0]);
+          const getData = await vehicleModel.getDeletedVehicle(id);
+          return response(res, 'Successfully deleted vehicle', getData[0]);
         }
       }else{
         return response(res, `Vehicle with ID=${id} not found`, null, 404);
