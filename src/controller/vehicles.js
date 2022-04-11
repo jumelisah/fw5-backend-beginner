@@ -48,21 +48,25 @@ exports.getVehicles = async(req, res)=>{
       return response(res, 'Data not found', null, 404);
     }
   } catch {
-    return response (res, 'Unexpected error', null, 500);
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
 exports.getVehicle = async(req, res)=>{
-  const {id} = req.params;
-  if(id>0){
-    const resultId = await vehicleModel.getVehicle(id);
-    if(resultId.length>0){
-      return response(res, 'Vehicle detail', resultId[0]);
+  try {
+    const {id} = req.params;
+    if(id>0){
+      const resultId = await vehicleModel.getVehicle(id);
+      if(resultId.length>0){
+        return response(res, 'Vehicle detail', resultId[0]);
+      }else{
+        return response(res, `Vehicle with ID=${id} not found`, null, 404);
+      }
     }else{
-      return response(res, `Vehicle with ID=${id} not found`, null, 404);
+      return response(res, 'ID should be a number greater than 0', null, 404);
     }
-  }else{
-    return response(res, 'ID should be a number greater than 0', null, 404);
+  }catch{
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
