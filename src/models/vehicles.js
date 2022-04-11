@@ -21,6 +21,13 @@ exports.getVehicle = (id)=>new Promise((resolve, reject)=>{
   });
 });
 
+exports.getDeletedVehicle = (id)=>new Promise((resolve, reject)=>{
+  db.query(`SELECT * FROM vehicles WHERE id=${id}`, (err, res)=>{
+    if(err) reject(err);
+    resolve(res);
+  });
+});
+
 exports.addVehicle = (data)=>new Promise((resolve, reject)=>{
   db.query(`INSERT INTO vehicles (name, image, year, cost, qty, type, seat, category_id, location) VALUES('${data.name}', '${data.image}', '${data.year}', ${data.cost}, ${data.qty}, '${data.type}', ${data.seat}, ${data.category_id}, '${data.location}')`, (err, res)=>{
     if(err) reject(err);
