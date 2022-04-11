@@ -191,16 +191,13 @@ exports.updateVehicle = async(req, res)=>{
       const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
-      console.log(id, 1)
       if(id==null || id==undefined || id==''){
-        console.log(id, 2)
         return response(res, 'Please input the ID first!', null, 400);
       }
       if(id<1){
-        // if(req.files){
-        //   deleteImage(cloudPath(req.files[0].filename));
-        // }
-        console.log(id, 3)
+        if(req.files.length > 0){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, 'ID should be a number greater than 0', null, 400);
       }
       const checkType = checkDataType(data, dataNumber, dataString);
@@ -210,9 +207,9 @@ exports.updateVehicle = async(req, res)=>{
       }
       const resultId = await vehicleModel.getVehicle(id);
       if(resultId.length<1){
-        // if(req.files){
-        //   deleteImage(cloudPath(req.files[0].filename));
-        // }
+        if(req.files.length > 0){
+          deleteImage(cloudPath(req.files[0].filename));
+        }
         return response(res, `Vehicle with ID=${id} not found`, null, 404);
       }
       dataName.forEach(x=>{
@@ -238,15 +235,15 @@ exports.updateVehicle = async(req, res)=>{
         }
       }
     }else{
-      // if(req.files){
-      //   deleteImage(cloudPath(req.files[0].filename));
-      // }
+      if(req.files.length > 0){
+        deleteImage(cloudPath(req.files[0].filename));
+      }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch {
-    // if(req.files){
-    //   deleteImage(cloudPath(req.files[0]?.filename));
-    // }
+    if(req.files.length > 0){
+      deleteImage(cloudPath(req.files[0]?.filename));
+    }
     return response(res, 'Unexpected Error', 400);
   }
 };
@@ -278,6 +275,6 @@ exports.deleteVehicle = async(req, res)=>{
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch (e) {
-    return response(res, 'Error', e, 500);
+    return response(res, 'Unexpected Error', e, 500);
   }
 };
