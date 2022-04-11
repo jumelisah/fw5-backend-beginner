@@ -260,9 +260,9 @@ exports.deleteVehicle = async(req, res)=>{
       }  
       const resultId = await vehicleModel.getVehicle(id);
       if(resultId.length>0){
-        if(resultId[0].image!==''){
-          deleteImage(cloudPath(resultId[0].image));
-        }
+        // if(resultId[0].image!==''){
+        //   deleteImage(cloudPath(resultId[0].image));
+        // }
         const deleteResult = await vehicleModel.deleteVehicle(id);
         if(deleteResult.affectedRows>0){
           
