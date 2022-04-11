@@ -196,7 +196,7 @@ exports.updateVehicle = async(req, res)=>{
         data.image = image;
       }
       console.log(req.files);
-      const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location'];
+      const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location', 'available'];
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
       if(id==null || id==undefined || id==''){
