@@ -6,59 +6,67 @@ const vehicleModel = require('../models/vehicles');
 const {APP_URL} = process.env;
 
 exports.getVehicles = async(req, res)=>{
-  let {name, location, cost_min, cost_max, page, limit} = req.query;
-  name = name || '';
-  location = location || '';
-  cost_min = parseInt(cost_min) || 0;
-  cost_max = parseInt(cost_max) || 1000000;
-  page = parseInt(page) || 1;
-  limit = parseInt(limit) || 5;
-  const offset = (page-1)*limit;
-  const data = {name, location, cost_min, cost_max, page, limit, offset};
-  const dataName = ['name', 'location', 'cost_min', 'cost_max'];
+  try{
+    let {name, location, cost_min, cost_max, page, limit} = req.query;
+    name = name || '';
+    location = location || '';
+    cost_min = parseInt(cost_min) || 0;
+    cost_max = parseInt(cost_max) || 1000000;
+    page = parseInt(page) || 1;
+    limit = parseInt(limit) || 5;
+    const offset = (page-1)*limit;
+    const data = {name, location, cost_min, cost_max, page, limit, offset};
+    const dataName = ['name', 'location', 'cost_min', 'cost_max'];
 
-  let url = `${APP_URL}vehicles?`;
-  dataName.forEach(x=>{
-    if(data[x]){
-      url = `${url}${x}=${data[x]}&`;
-    }
-  });
-  if(cost_min>=cost_max){
-    return response(res, 'cost_max should be more than cost_min', null, 400);
-  }
-
-  const vehicleData = await vehicleModel.getVehicles(data);
-  const totalData = await vehicleModel.countData(data);
-  const total = totalData[0].total;
-  let last = Math.ceil(total/limit);
-  const pageInfo = {
-    prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
-    next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
-    currentPage : page,
-    lastPage: last
-  };
-  if(vehicleData.length>0){
-    return res.json({
-      success: true,
-      message: 'List of popular vehicle',
-      result: vehicleData, pageInfo
+    let url = `${APP_URL}vehicles?`;
+    dataName.forEach(x=>{
+      if(data[x]){
+        url = `${url}${x}=${data[x]}&`;
+      }
     });
-  }else{
-    return response(res, 'Data not found', null, 404);
+    if(cost_min>=cost_max){
+      return response(res, 'cost_max should be more than cost_min', null, 400);
+    }
+
+    const vehicleData = await vehicleModel.getVehicles(data);
+    const totalData = await vehicleModel.countData(data);
+    const total = totalData[0].total;
+    let last = Math.ceil(total/limit);
+    const pageInfo = {
+      prev : page > 1 ? `${url}page=${page-1}&limit=${limit}` : null,
+      next : page < last ? `${url}page=${page+1}&limit=${limit}` : null,
+      currentPage : page,
+      lastPage: last
+    };
+    if(vehicleData.length>0){
+      return res.json({
+        success: true,
+        message: 'List of popular vehicle',
+        result: vehicleData, pageInfo
+      });
+    }else{
+      return response(res, 'Data not found', null, 404);
+    }
+  } catch {
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
 exports.getVehicle = async(req, res)=>{
-  const {id} = req.params;
-  if(id>0){
-    const resultId = await vehicleModel.getVehicle(id);
-    if(resultId.length>0){
-      return response(res, 'Vehicle detail', resultId[0]);
+  try {
+    const {id} = req.params;
+    if(id>0){
+      const resultId = await vehicleModel.getVehicle(id);
+      if(resultId.length>0){
+        return response(res, 'Vehicle detail', resultId[0]);
+      }else{
+        return response(res, `Vehicle with ID=${id} not found`, null, 404);
+      }
     }else{
-      return response(res, `Vehicle with ID=${id} not found`, null, 404);
+      return response(res, 'ID should be a number greater than 0', null, 404);
     }
-  }else{
-    return response(res, 'ID should be a number greater than 0', null, 404);
+  }catch{
+    return response(res, 'Unexpected error', null, 500);
   }
 };
 
@@ -266,6 +274,7 @@ exports.deleteVehicle = async(req, res)=>{
         const deleteResult = await vehicleModel.deleteVehicle(id);
         if(deleteResult.affectedRows>0){
           const getData = await vehicleModel.getDeletedVehicle(id);
+          console.log(getData);
           return response(res, 'Successfully deleted vehicle', getData[0]);
         }
       }else{

@@ -8,7 +8,7 @@ exports.getVehicles = (data)=>new Promise((resolve, reject)=>{
 });
 
 exports.countData = (data)=>new Promise((resolve, reject)=>{
-  db.query(`SELECT COUNT(*) AS total FROM vehicles WHERE name LIKE '%${data.name}%' AND location LIKE '%${data.location}%' AND cost>=${data.cost_min} AND  AND is_deleted=0 cost<=${data.cost_max}`, (err, res)=>{
+  db.query(`SELECT COUNT(*) AS total FROM vehicles WHERE name LIKE '%${data.name}%' AND location LIKE '%${data.location}%' AND cost>=${data.cost_min} AND cost<=${data.cost_max} AND is_deleted=0`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
