@@ -166,6 +166,8 @@ exports.editHistoryStatus = async (req, res) => {
       return response(res, 'History not found');
     }
     console.log(getResult);
+    console.log(getResult[0].user_id, typeof(getResult[0].user_id));
+    console.log(req.user.id, typeof(req.user.id));
     if (getResult[0].user_id !== req.user.id || req.user.role !== 'admin') {
       return response (res, 'Unauthorized', null, 403);
     }
