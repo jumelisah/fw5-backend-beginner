@@ -168,7 +168,7 @@ exports.editHistoryStatus = async (req, res) => {
     console.log(getResult);
     console.log(getResult[0].user_id, typeof(getResult[0].user_id));
     console.log(req.user.id, typeof(req.user.id));
-    if (getResult[0].user_id !== req.user.id || req.user.role !== 'admin') {
+    if (getResult[0].user_id != req.user.id && req.user.role !== 'admin') {
       return response (res, 'Unauthorized', null, 403);
     }
     const resultUpdate = await historyModel.updateHistory({status: req.body.status}, id);
