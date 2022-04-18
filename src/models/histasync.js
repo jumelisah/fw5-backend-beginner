@@ -1,14 +1,14 @@
 const db = require('../helpers/db');
 
 exports.getHistories = (data)=>new Promise((resolve, reject)=>{
-  db.query(`SELECT h.id, v.name AS vehicle, v.image AS image, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE v.name LIKE '%${data.vehicle_name}%' AND h.delete_by_admin=0 ORDER BY 'h.id' DESC LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
+  db.query(`SELECT h.id, v.name AS vehicle, v.image AS image, u.name AS user_name, h.recipient AS recipient, h.phone_number AS phone_number, h.email as email, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE v.name LIKE '%${data.vehicle_name}%' AND h.delete_by_admin=0 ORDER BY 'h.id' DESC LIMIT ${data.limit} OFFSET ${data.offset}`, (err,res)=>{
     if(err) reject(err);
     resolve(res);
   });
 });
 
 exports.getHistory = (id)=>new Promise((resolve, reject)=>{
-  db.query('SELECT h.id, v.id AS vehicle_id, v.name AS vehicle, u.id AS user_id, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status, delete_by_user, delete_by_admin FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE h.id = ?', [id], (err,res)=>{
+  db.query('SELECT h.id, v.id AS vehicle_id, v.name AS vehicle, u.id AS user_id, u.name AS user_name, h.recipient AS recipient, h.phone_number AS phone_number, h.email as email, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status, delete_by_user, delete_by_admin FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE h.id = ?', [id], (err,res)=>{
     if(err) reject(err);
     resolve(res);
   });
@@ -22,7 +22,7 @@ exports.getUser = (user_id)=>new Promise((resolve, reject)=>{
 });
 
 exports.userHistories = (data) => new Promise((resolve, reject)=>{
-  db.query(`SELECT h.id, v.name AS vehicle, v.image AS image, u.name AS user_name, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE user_id=${data.user_id} AND delete_by_user=0  ORDER BY h.id DESC LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
+  db.query(`SELECT h.id, v.name AS vehicle, v.image AS image, u.name AS user_name, h.recipient AS recipient, h.phone_number AS phone_number, h.email as email, h.total_cost AS cost, h.prepayment AS min_prepayment, rent_date, return_date, status FROM histories h JOIN users u ON h.user_id=u.id JOIN vehicles v ON h.vehicle_id=v.id WHERE user_id=${data.user_id} AND delete_by_user=0  ORDER BY h.id DESC LIMIT ${data.limit} OFFSET ${data.offset}`, (err, res)=>{
     if(err) reject(err);
     resolve(res);
   });
