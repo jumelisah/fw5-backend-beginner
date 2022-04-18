@@ -28,6 +28,19 @@ exports.getLocation = async(req, res) => {
   }
 };
 
+exports.getLocationById = async(req, res) => {
+  try{
+    const {id} = req.params;
+    const getLocation = await locationsModel.getLocationById(id);
+    if(getLocation.length < 1) {
+      return response(res, 'Data not found', null, 404, null);
+    }
+    return response(res, 'Location detail', getLocation);
+  } catch {
+    return response(res, 'Unexpected error', null, 500, null);
+  }
+};
+
 exports.addLocations = async(req, res) => {
   try {
     if(req.user.role !== 'admin') {
