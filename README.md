@@ -39,7 +39,7 @@ git clone https://github.com/jumelisah/fw5-backend-beginner.git cd Backend-Begin
 npm i
 ```
 ```sh
-node app
+npm run dev
 ```
 
 # Standard Response and Preview Request By Postman
