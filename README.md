@@ -33,7 +33,7 @@ API for vehicle rental application built with NodeJS
 # Installation
 
 ```sh
-git clone https://github.com/jumelisah/fw5-backend-beginner.git cd Backend-Beginner
+git clone https://github.com/jumelisah/seran-backend.git
 ```
 ```sh
 npm i
