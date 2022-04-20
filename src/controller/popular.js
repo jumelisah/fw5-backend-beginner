@@ -44,17 +44,11 @@ const popularList = (req, res)=>{
             currentPage : page,
             lastPage: last
           };
-          return res.json({
-            success: true,
-            message: 'List of popular vehicle',
-            result: results, pageInfo
-          });
+          return response(res, 'List of popular vehicle', results, 200, pageInfo);
         });
       }else{
-        return res.status(404).send({
-          success: false,
-          message: 'Data not found'
-        });}
+        return response(res, 'Data not found', null, 404);
+      }
     });
   } catch(e) {
     return response(res, 'Unexpected error', null, 500);

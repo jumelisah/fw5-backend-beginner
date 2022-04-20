@@ -32,7 +32,7 @@ exports.getUsers = async(req, res)=>{
     lastPage: last
   };
   if(result.length>0){
-    return response(res, 'List of users', [result, pageInfo]);
+    return response(res, 'List of users', result, 200, pageInfo);
   }else{
     return response(res, 'No data found', null);
   }
@@ -59,7 +59,7 @@ exports.createUser = async(req, res)=>{
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
-    const data = {username, email, password, image};
+    const data = {username, email, password, image, name: username};
     const dataName = ['username', 'email', 'password', 'image'];
     const itsNull = isNull(data, dataName);
     if(itsNull){

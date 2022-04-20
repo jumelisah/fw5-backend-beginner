@@ -39,11 +39,7 @@ exports.getVehicles = async(req, res)=>{
       lastPage: last
     };
     if(vehicleData.length>0){
-      return res.json({
-        success: true,
-        message: 'List of popular vehicle',
-        result: vehicleData, pageInfo
-      });
+      return response(res, 'Vehicle List', vehicleData, 200, pageInfo);
     }else{
       return response(res, 'Data not found', null, 404);
     }
@@ -103,11 +99,7 @@ exports.getPopularVehicle = async(req, res)=>{
     lastPage: last
   };
   if(vehicleData.length>0){
-    return res.json({
-      success: true,
-      message: 'List of popular vehicle',
-      result: vehicleData, pageInfo
-    });
+    return response(res, 'List of popular vehicle', vehicleData, 200, pageInfo);
   }else{
     return response(res, 'Data not found', null, 404);
   }
