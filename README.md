@@ -1,5 +1,5 @@
 # About
-This is repository of backend beginner task for Fazztrack Bootcamp
+API for vehicle rental application built with NodeJS
 
 ## Vehicles Endpoint
 | Method | API | Remark |
