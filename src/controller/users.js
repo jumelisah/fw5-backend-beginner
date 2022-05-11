@@ -117,7 +117,7 @@ exports.createUser = async(req, res)=>{
       return response(res, 'Unexpected error: Can\'t send confirmation code', null);
     }
   }catch(err){
-    if(req.files){
+    if(req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
     return response(res, 'Input the password!', null, 400);
@@ -132,7 +132,7 @@ exports.updateUser = async(req, res)=>{
     }
     let image = '';
     const data = {};
-    if(req.files){
+    if(req.files.length > 0){
       image = req.files[0].path;
       data.image = image;
     }
@@ -160,7 +160,7 @@ exports.updateUser = async(req, res)=>{
           return response(res, checkType, null, 400);
         }
         if(req.body.password==''){
-          if(req.files){
+          if(req.files.length > 0){
             deleteImage(cloudPath(req.files[0].filename));
           }
           return response(res, 'Please input the password', null, 400);
@@ -171,7 +171,7 @@ exports.updateUser = async(req, res)=>{
             const password = await bcrypt.hash(data.password, salt);
             data.password = password;
           }else{
-            if(req.files){
+            if(req.files.length > 0){
               deleteImage(cloudPath(req.files[0].filename));
             }
             return response(res, 'Password should contain 6 characters and more', null, 400);
@@ -181,7 +181,7 @@ exports.updateUser = async(req, res)=>{
         if(data.email){
           const itsEmail = isEmail(data.email);
           if(!itsEmail){
-            if(req.files){
+            if(req.files.length > 0){
               deleteImage(cloudPath(req.files[0].filename));
             }
             return response(res, 'Wrong email format!', null, 400);
@@ -193,7 +193,7 @@ exports.updateUser = async(req, res)=>{
         }
         if(data.phone_number){
           if(data.phone_number.length<10 || data.phone_number.length>13){
-            if(req.files){
+            if(req.files.length > 0){
               deleteImage(cloudPath(req.files[0].filename));
             }
             return response(res, 'Phone number length should be between 10-13 numbers', null, 400);
@@ -206,7 +206,7 @@ exports.updateUser = async(req, res)=>{
         if(data.username){
           const checkUname = await usersProfile.getUserUname(data.username);
           if(checkUname.length>0 && id!=checkUname[0].id){
-            if(req.files){
+            if(req.files.length > 0){
               deleteImage(cloudPath(req.files[0].filename));
             }
             return response(res, 'Username not available', null, 400);
@@ -217,7 +217,7 @@ exports.updateUser = async(req, res)=>{
           if(itsDate!=='Invalid Date'){
             data.birthdate = itsDate;
           }else{
-            if(req.files){
+            if(req.files.length > 0){
               deleteImage(cloudPath(req.files[0].filename));
             }
             return response(res, 'Invalid date format', null, 400);
@@ -233,28 +233,28 @@ exports.updateUser = async(req, res)=>{
             return response(res, 'Error: Can\'t get updated data', null, 500);
           }
         }else{
-          if(req.files){
+          if(req.files.length > 0){
             deleteImage(cloudPath(req.files[0].filename));
           }
           return response(res, 'Error: Can\'t update user', null, 500);
         }
       }else{
-        if(req.files){
+        if(req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'User not found', null, 400);
       }
     }else{
-      if(req.files){
+      if(req.files.length > 0){
         deleteImage(cloudPath(req.files[0].filename));
       }
       return response(res, 'Unmatch ID', null, 403);
     }
   } catch (e) {
-    if(req.files){
+    if(req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
-    return response(res, 'Error', e, 400);
+    return response(res, 'Unexpected error', e, 400);
   }
 };
 

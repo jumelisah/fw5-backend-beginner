@@ -11,7 +11,7 @@ route.use('/locations', require('./locations'));
 route.get('/', (req, res)=>{
   return res.json({
     success: true,
-    message: 'Backend is going well'
+    message: 'Backend is running well'
   });
 });
 
