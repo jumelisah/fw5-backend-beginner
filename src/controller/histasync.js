@@ -67,7 +67,7 @@ exports.getUserHistories = async(req, res)=>{
       last : last
     };
     if(historyResult.length>0){
-      return response(res, 'Rent History', [historyResult,pageInfo]);
+      return response(res, 'Rent History', historyResult, 200, pageInfo);
     }else{
       return response(res, 'History not found', null, 404);
     }
