@@ -169,9 +169,6 @@ exports.editHistoryStatus = async (req, res) => {
     if (getResult.length < 1) {
       return response(res, 'History not found');
     }
-    console.log(getResult);
-    console.log(getResult[0].user_id, typeof(getResult[0].user_id));
-    console.log(req.user.id, typeof(req.user.id));
     if (getResult[0].user_id != req.user.id && req.user.role !== 'admin') {
       return response (res, 'Unauthorized', null, 403);
     }
@@ -186,7 +183,7 @@ exports.editHistoryStatus = async (req, res) => {
       }
     }
     const updatedData = await historyModel.getHistory(id);
-    return response(res, 'Transaction was updated', updatedData, 200);
+    return response(res, 'Transaction was updated', updatedData[0], 200);
 
   }catch{
     return response(res, 'Unexpected error', null, 500);
