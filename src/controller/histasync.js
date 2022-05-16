@@ -31,20 +31,24 @@ exports.getHistories = async(req, res)=>{
 };
 
 exports.getHistory = async(req, res)=>{
-  if(req.user.role=='admin'){
+  try {
     const {id} = req.params;
     if(id>0){
       const historyResult = await historyModel.getHistory(id);
       if(historyResult.length>0){
-        return response(res, `Rent History with ID: ${id}`, historyResult[0]);
+        if (req.user.role !== 'admin' || req.user.role !== 'Admin' || req.user.id !== historyResult[0].user_id) {
+          return response(res, 'Unauthorized', null, 403);
+        } else {
+          return response(res, `Rent History with ID: ${id}`, historyResult[0]);
+        }
       }else{
         return response(res, `History with ID: ${id} not found`, null, 404);
       }
     }else{
       return response(res, 'History ID should be a number greater than 0', null, 400);
     }
-  }else{
-    return response(res, 'You are not allow to see this page', null, 403);
+  } catch {
+    return response(res, 'Unexpected error', null, 400);
   }
 };
 
