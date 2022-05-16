@@ -36,7 +36,7 @@ exports.getHistory = async(req, res)=>{
     if(id>0){
       const historyResult = await historyModel.getHistory(id);
       if(historyResult.length>0){
-        if (req.user.role !== 'admin' || req.user.role !== 'Admin' || req.user.id !== historyResult[0].user_id) {
+        if (req.user.role !== 'admin' && req.user.role !== 'Admin' && req.user.id !== historyResult[0].user_id) {
           return response(res, 'Unauthorized', null, 403);
         } else {
           return response(res, `Rent History with ID: ${id}`, historyResult[0]);
