@@ -112,9 +112,7 @@ exports.addVehicle = async (req, res)=>{
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648980071/SERAN/uploads/vehicles/Untitled_design_4_pus3lj.png';
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
-      console.log(data, '1');
-      console.log(req.files);
-      if(req.files.length > 0){
+      if(req.files && req.files.length > 0){
         image = req.files[0].path;
       }
       console.log(image);
@@ -127,7 +125,7 @@ exports.addVehicle = async (req, res)=>{
       const checkType = checkDataType(data, dataNumber, dataString);
       console.log(2);
       if(itsNull){
-        if(req.files.length > 0){
+        if(req.files && req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Please fill in all the fields.', null, 400);
@@ -139,7 +137,7 @@ exports.addVehicle = async (req, res)=>{
       console.log(4);
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0){
-        if(req.files.length > 0){
+        if(req.files && req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Vehicle already on the list', null, 400);
@@ -155,19 +153,19 @@ exports.addVehicle = async (req, res)=>{
           return response(res, 'Error: Can\'t get data', null, 500);
         }
       }else{
-        if(req.files.length > 0){
+        if(req.files && req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Error: Can\'t add vehicle', null, 500);
       }
     }else{
-      if(req.files.length > 0){
+      if(req.files && req.files.length > 0){
         deleteImage(cloudPath(req.files[0].filename));
       }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch (e) {
-    if(req.files.length > 0){
+    if(req.files && req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
     return response(res, 'Unexpected error', null, 500);
@@ -183,7 +181,7 @@ exports.updateVehicle = async(req, res)=>{
       const data = {};
       let image ='';
       console.log(req.files);
-      if(req.files.length>0){
+      if(req.files && req.files.length>0){
         image = req.files[0].path;
         data.image = image;
       }
@@ -195,7 +193,7 @@ exports.updateVehicle = async(req, res)=>{
         return response(res, 'Please input the ID first!', null, 400);
       }
       if(id<1){
-        if(req.files.length > 0){
+        if(req.files && req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'ID should be a number greater than 0', null, 400);
@@ -207,7 +205,7 @@ exports.updateVehicle = async(req, res)=>{
       }
       const resultId = await vehicleModel.getVehicle(id);
       if(resultId.length<1){
-        if(req.files.length > 0){
+        if(req.files && req.files.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, `Vehicle with ID=${id} not found`, null, 404);
@@ -235,16 +233,16 @@ exports.updateVehicle = async(req, res)=>{
         }
       }
     }else{
-      if(req.files.length > 0){
+      if(req.files && req.files.length > 0){
         deleteImage(cloudPath(req.files[0].filename));
       }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch {
-    if(req.files.length > 0){
+    if(req.files && req.files.length > 0){
       deleteImage(cloudPath(req.files[0]?.filename));
     }
-    return response(res, 'Unexpected Error', 400);
+    return response(res, 'Unexpected Error', null, 400);
   }
 };
 
