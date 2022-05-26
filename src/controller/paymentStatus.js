@@ -76,7 +76,11 @@ exports.createPayment = async (req, res) => {
 exports.updatePaymentStatus = async(req, res) => {
   try {
     console.log(req.body);
+    console.log('1. check error');
+    console.log(req.body);
     const notif = await coreApi.transaction.notification(req.body);
+    console.log('2. error');
+    console.log(notif);
     const data = {
       order_id: notif.order_id,
       response_midtrans: JSON.stringify(notif.response_midtrans)
