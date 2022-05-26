@@ -85,6 +85,7 @@ exports.updatePaymentStatus = async(req, res) => {
     const result = await paymentModel.getPaymentByOrder(data.order_id);
     return response(res, 'Payment success', result[0]);
   } catch (e) {
+    console.log(e);
     return response(res, e.message, null, 500);
   }
 };
