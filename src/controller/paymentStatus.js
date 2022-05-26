@@ -13,9 +13,19 @@ let coreApi = new midtransClient.CoreApi({
 exports.getPaymentStatus = async(req, res) => {
   try {
     const results = await paymentModel.getPayment();
-    return response(res, 'Payment status list', results, 200, null);
+    const dataResults = [];
+    results.forEach(element => {
+      const el = {
+        id: element.id,
+        order_id: element.order_id,
+        name: element.name,
+        response_midtrans: JSON.parse(element.response_midtrans)
+      };
+      dataResults.push(el);
+    });
+    return response(res, 'Payment status list', dataResults, 200, null);
   } catch (e) {
-    return response(res, e, null, 500);
+    return response(res, e.message, null, 500);
   }
 };
 
@@ -24,7 +34,7 @@ exports.getPaymentDetail = async(req, res) => {
     const result = await paymentModel.getPaymentByID(req.params.id);
     return response(res, 'Payment detail', result[0]);
   } catch (e) {
-    return response(res, e, null, 500);
+    return response(res, e.message, null, 500);
   }
 };
 
@@ -39,13 +49,18 @@ exports.createPayment = async (req, res) => {
         'order_id': req.body.order_id,
         'gross_amount': req.body.gross_amount
       },
-      'name': req.body.name,
+      'customer_details': {
+        'email': 'budi.utomo@Midtrans.com',
+        'first_name': req.body.first_name,
+        'last_name': req.body.last_name || '',
+        'phone': '+6281 1234 1234'
+      },
     };
     const midtransResponse = await coreApi.charge(parameter);
     console.log(midtransResponse);
     const data = {
       order_id: midtransResponse.order_id,
-      name: req.body.name,
+      name: `${req.body.first_name} ${req.body.last_name || ''}`,
       gross_amount: midtransResponse.gross_amount,
       response_midtrans: JSON.stringify(midtransResponse)
     };
@@ -54,6 +69,21 @@ exports.createPayment = async (req, res) => {
     return response(res, 'Successfully add new payment', getNewData[0]);
   } catch (e) {
     console.log(e);
-    return response(res, e, null, 500);
+    return response(res, e.message, null, 500);
+  }
+};
+
+exports.updatePaymentStatus = async(req, res) => {
+  try {
+    const notif = await coreApi.transaction.notification(req.body);
+    const data = {
+      order_id: notif.order_id,
+      response_midtrans: JSON.stringify(notif.response_midtrans)
+    };
+    await paymentModel.updateStatus(data);
+    const result = await paymentModel.getPaymentByOrder(data.order_id);
+    return response(res, 'Payment success', result[0]);
+  } catch (e) {
+    return response(res, e.message, null, 500);
   }
 };

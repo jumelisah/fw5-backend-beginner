@@ -134,7 +134,6 @@ exports.addVehicle = async (req, res)=>{
       if(checkType.length>0){
         return response(res, checkType, null, 400);
       }
-      console.log(4);
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0){
         if(req.files && req.files.length > 0){
@@ -142,9 +141,7 @@ exports.addVehicle = async (req, res)=>{
         }
         return response(res, 'Vehicle already on the list', null, 400);
       }
-      console.log(5);
       const addResult = await vehicleModel.addVehicle(data);
-      console.log(6);
       if(addResult.affectedRows>0){
         const resultId = await vehicleModel.getVehicle(addResult.insertId);
         if(resultId.length===1){
