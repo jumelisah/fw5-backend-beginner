@@ -1,5 +1,6 @@
 const express = require ('express');
 const cors = require('cors');
+const bodyParser = require('body-parser');
 require('dotenv').config();
 const app = express();
 const options = {
@@ -12,6 +13,7 @@ const options = {
 app.use(express.urlencoded({extended : true}));
 
 app.use(cors(options));
+app.use(bodyParser.json());
 app.use(require('./src/routes'));
 app.use('/uploads', express.static('uploads'));
 
