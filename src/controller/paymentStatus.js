@@ -75,6 +75,7 @@ exports.createPayment = async (req, res) => {
 
 exports.updatePaymentStatus = async(req, res) => {
   try {
+    console.log(req.body);
     const notif = await coreApi.transaction.notification(req.body);
     const data = {
       order_id: notif.order_id,
