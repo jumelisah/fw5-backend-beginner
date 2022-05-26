@@ -1,13 +1,14 @@
 const response = require('../helpers/response');
 const paymentModel = require('../models/paymentStatus');
+const {MIDTRANS_SERVER, MIDTRANS_CLIENT} = process.env;
 
 
 const midtransClient = require('midtrans-client');
 // Create Core API instance
 let coreApi = new midtransClient.CoreApi({
   isProduction : false,
-  serverKey : 'SB-Mid-server-6C4n1N47AxW-bn1TNBuO2pr4',
-  clientKey : 'SB-Mid-client-x619BxXG_CKajbM8'
+  serverKey : MIDTRANS_SERVER,
+  clientKey : MIDTRANS_CLIENT,
 });
 
 exports.getPaymentStatus = async(req, res) => {
@@ -59,7 +60,7 @@ exports.createPayment = async (req, res) => {
     const midtransResponse = await coreApi.charge(req.body);
     const data = {
       order_id: midtransResponse.order_id,
-      name: `${req.body.first_name} ${req.body.last_name || ''}`,
+      name: `${req.body.customer_details.first_name} ${req.body.customer_details.last_name || ''}`,
       gross_amount: midtransResponse.gross_amount,
       response_midtrans: JSON.stringify(midtransResponse)
     };
