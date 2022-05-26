@@ -1,5 +1,5 @@
 # About
-An API for vehicle rental application built with NodeJS and ExpressJS, specificially made to provide data for [Seran -Vehicle Rent](https://github.com/jumelisah/seran-frontend-react). The API includes some endpoint such as the list below
+An API for vehicle rental application built with ExpressJS, specificially made to provide data for [Seran -Vehicle Rent](https://github.com/jumelisah/seran-frontend-react). The API includes some endpoint such as the list below
 
 ## Vehicles Endpoint
 | Method | API | Remark |
