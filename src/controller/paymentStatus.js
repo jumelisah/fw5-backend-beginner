@@ -76,7 +76,7 @@ exports.updatePaymentStatus = async(req, res) => {
     const notif = await coreApi.transaction.notification(req.body);
     const data = {
       order_id: notif.order_id,
-      response_midtrans: JSON.stringify(notif.response_midtrans)
+      response_midtrans: JSON.stringify(notif)
     };
     await paymentModel.updateStatus(data);
     const result = await paymentModel.getPaymentByOrder(data.order_id);

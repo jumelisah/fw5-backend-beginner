@@ -29,7 +29,7 @@ exports.createPaymentStatus = (data) => new Promise((resolve, reject) => {
 });
 
 exports.updateStatus = (data) => new Promise ((resolve, reject) => {
-  db.query(`UPDATE payment_status SET response_midtrans=${data.response_midtrans} WHERE order_id=${data.order_id}`, (err, res) => {
+  db.query(`UPDATE payment_status SET response_midtrans='${data.response_midtrans}' WHERE order_id=${data.order_id}`, (err, res) => {
     if(err) reject(err);
     resolve(res);
   });
