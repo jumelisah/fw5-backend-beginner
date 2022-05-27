@@ -33,7 +33,11 @@ exports.getPaymentStatus = async(req, res) => {
 exports.getPaymentDetail = async(req, res) => {
   try {
     const result = await paymentModel.getPaymentByID(req.params.id);
-    return response(res, 'Payment detail', result[0]);
+    if (result.length > 0) {
+      return response(res, 'Payment detail', result[0]);
+    } else {
+      return response(res, 'Not found', null, 404);
+    }
   } catch (e) {
     return response(res, e.message, null, 500);
   }
@@ -42,7 +46,11 @@ exports.getPaymentDetail = async(req, res) => {
 exports.getPaymentByOrderId = async(req, res) => {
   try {
     const result = await paymentModel.getPaymentByOrder(req.params.id);
-    return response(res, 'Payment detail', result[0]);
+    if (result.length > 0) {
+      return response(res, 'Payment detail', result[0]);
+    } else {
+      return response(res, 'Not found', null, 404);
+    }
   } catch (e) {
     return response(res, e.message, null, 500);
   }
