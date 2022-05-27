@@ -4,8 +4,8 @@ const {MIDTRANS_SERVER, MIDTRANS_CLIENT} = process.env;
 
 
 const midtransClient = require('midtrans-client');
-// Create Core API instance
-let coreApi = new midtransClient.CoreApi({
+
+let snap = new midtransClient.Snap({
   isProduction : false,
   serverKey : MIDTRANS_SERVER,
   clientKey : MIDTRANS_CLIENT,
@@ -41,29 +41,15 @@ exports.getPaymentDetail = async(req, res) => {
 
 exports.createPayment = async (req, res) => {
   try {
-    // let parameter = {
-    //   'payment_type': 'bank_transfer',
-    //   'bank_transfer': {
-    //     'bank': req.body.bank
-    //   },
-    //   'transaction_details': {
-    //     'order_id': req.body.order_id,
-    //     'gross_amount': req.body.gross_amount
-    //   },
-    //   'customer_details': {
-    //     'email': 'budi.utomo@Midtrans.com',
-    //     'first_name': req.body.first_name,
-    //     'last_name': req.body.last_name || '',
-    //     'phone': '+6281 1234 1234'
-    //   },
-    // };
-    const midtransResponse = await coreApi.charge(req.body);
+    const midtransResponse = await snap.createTransaction(req.body);
+    console.log(midtransResponse);
     const data = {
-      order_id: midtransResponse.order_id,
+      order_id: req.body.transaction_details.order_id,
       name: `${req.body.customer_details.first_name} ${req.body.customer_details.last_name || ''}`,
-      gross_amount: midtransResponse.gross_amount,
+      gross_amount: req.body.transaction_details.gross_amount,
       response_midtrans: JSON.stringify(midtransResponse)
     };
+    console.log(data);
     const createData = await paymentModel.createPaymentStatus(data);
     const getNewData = await paymentModel.getPaymentByID(createData.insertId);
     return response(res, 'Successfully add new payment', getNewData[0]);
@@ -74,10 +60,12 @@ exports.createPayment = async (req, res) => {
 
 exports.updatePaymentStatus = async(req, res) => {
   try {
-    const notif = await coreApi.transaction.notification(req.body);
+    const notif = await snap.transaction.notification(req.body);
+    const getData = await paymentModel.getPaymentByOrder(notif.order_id);
+    const responses = [getData[0].response_midtrans, notif];
     const data = {
       order_id: notif.order_id,
-      response_midtrans: JSON.stringify(notif)
+      response_midtrans: JSON.stringify(responses)
     };
     await paymentModel.updateStatus(data);
     const result = await paymentModel.getPaymentByOrder(data.order_id);
