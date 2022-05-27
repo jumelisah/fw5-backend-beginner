@@ -61,11 +61,9 @@ exports.createPayment = async (req, res) => {
 exports.updatePaymentStatus = async(req, res) => {
   try {
     const notif = await snap.transaction.notification(req.body);
-    const getData = await paymentModel.getPaymentByOrder(notif.order_id);
-    const responses = [getData[0].response_midtrans, notif];
     const data = {
       order_id: notif.order_id,
-      response_midtrans: JSON.stringify(responses)
+      response_midtrans: JSON.stringify(notif)
     };
     await paymentModel.updateStatus(data);
     const result = await paymentModel.getPaymentByOrder(data.order_id);
