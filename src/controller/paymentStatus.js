@@ -39,17 +39,24 @@ exports.getPaymentDetail = async(req, res) => {
   }
 };
 
+exports.getPaymentByOrderId = async(req, res) => {
+  try {
+    const result = await paymentModel.getPaymentByOrder(req.params.id);
+    return response(res, 'Payment detail', result[0]);
+  } catch (e) {
+    return response(res, e.message, null, 500);
+  }
+};
+
 exports.createPayment = async (req, res) => {
   try {
     const midtransResponse = await snap.createTransaction(req.body);
-    console.log(midtransResponse);
     const data = {
       order_id: req.body.transaction_details.order_id,
       name: `${req.body.customer_details.first_name} ${req.body.customer_details.last_name || ''}`,
       gross_amount: req.body.transaction_details.gross_amount,
       response_midtrans: JSON.stringify(midtransResponse)
     };
-    console.log(data);
     const createData = await paymentModel.createPaymentStatus(data);
     const getNewData = await paymentModel.getPaymentByID(createData.insertId);
     return response(res, 'Successfully add new payment', getNewData[0]);
