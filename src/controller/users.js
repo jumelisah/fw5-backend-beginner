@@ -1,8 +1,8 @@
 const usersProfile = require('../models/users');
 const authModel = require('../models/auth');
 const bcrypt = require('bcrypt');
-const {APP_URL} = process.env;
-// const mail = require('../helpers/mail');
+const {APP_URL, APP_EMAIL} = process.env;
+const mail = require('../helpers/mail');
 const response = require('../helpers/response');
 const isEmail = require('../helpers/emailvalidator');
 const isNull = require('../helpers/isNull');
@@ -103,18 +103,18 @@ exports.createUser = async(req, res)=>{
     if(addConfirmCode.affectedRows<1){
       return response(res, 'Unexpected error: Can\'t get confirmation code', null, 500);
     }
-    // const info = await mail.sendMail({
-    //   from: APP_EMAIL,
-    //   to: email,
-    //   subject: 'Register Confirmation | Backend Beginner',
-    //   text: String(randomCode),
-    //   html: `Here's the code you need to confirm your account: <b>${randomCode}</b>`
-    // });
-    // if(info){
-    //   return response(res, 'Register success. We\'ve sent confirmation code to your email.', null);
-    // }else{
-    //   return response(res, 'Unexpected error: Can\'t send confirmation code', null);
-    // }
+    const info = await mail.sendMail({
+      from: APP_EMAIL,
+      to: email,
+      subject: 'Register Confirmation | Backend Beginner',
+      text: String(randomCode),
+      html: `Here's the code you need to confirm your account: <b>${randomCode}</b>`
+    });
+    if(info){
+      return response(res, 'Register success. We\'ve sent confirmation code to your email.', null);
+    }else{
+      return response(res, 'Unexpected error: Can\'t send confirmation code', null);
+    }
   }catch(err){
     if(req.files && req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
