@@ -55,7 +55,6 @@ exports.getUser = async(req, res)=>{
 exports.createUser = async(req, res)=>{
   const {username, email, password: rawPassword, confirmPassword} = req.body;
   const image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648876041/SERAN/uploads/users/default-user_cyzz1x.png';
-  console.log(req.body.confirmPassword);
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
@@ -120,7 +119,7 @@ exports.createUser = async(req, res)=>{
     if(req.files && req.files.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
-    return response(res, 'Input the password!', null, 400);
+    return response(res, 'UNexpected error!', null, 400);
   }
 };
 
