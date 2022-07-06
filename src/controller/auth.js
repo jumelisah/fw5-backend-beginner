@@ -128,7 +128,7 @@ exports.forgotPassword = async(req, res)=>{
       const info = await mail.sendMail({
         from: APP_EMAIL,
         to: getUser[0].email,
-        subject: 'Reset Password Request | Backend Beginner',
+        subject: 'Reset Password Request | Seran - Vehicle Rent',
         text: String(randomCode),
         html: `Here's the code you need to reset your password: <b>${randomCode}</b>`
       });
@@ -189,7 +189,7 @@ exports.confirmAccount = async(req, res)=>{
       const info = await mail.sendMail({
         from: APP_EMAIL,
         to: email,
-        subject: 'New Confirmation Code | Backend Beginner',
+        subject: 'New Confirmation Code | Seran - Vehicle Rent',
         text: String(randomCode),
         html: `Here's the new code you need to confirm your account: <b>${randomCode}</b>`
       });
