@@ -330,12 +330,16 @@ exports.deleteHistoryAdmin = async(req, res)=>{
 exports.checkStatusCar = async(req, res) => {
   try{
     const {status} = req.params;
-    if(typeof(parseInt(status))!== 'number'){
+    if(status > 0){
+      if(parseInt(status) < 0 && parseInt(status) >3){
+        return response(res, 'Please input number of the status: 1. Booked, 2. Wait for payment, 3. Rent', null, 400, null);
+      }
+      const statusList = ['Booked', 'Wait for payment', 'Rent'];
+      const dataStatus = await historyModel.getHistoryStatus(statusList[status-1]);
+      return response(res,  `List of ${statusList[status-1]}`, dataStatus, 200, {totalData: dataStatus.length} );
+    } else{
       return response(res, 'Please input number of the status: 1. Booked, 2. Wait for payment, 3. Rent', null, 400, null);
     }
-    const statusList = ['Booked', 'Wait for payment', 'Rent'];
-    const dataStatus = await historyModel.getHistoryStatus(statusList[status-1]);
-    return response(res,  `List of ${statusList[status-1]}`, dataStatus, 200, {totalData: dataStatus.length} );
   } catch(err) {
     return response(res, String(err), null, 500);
   }
