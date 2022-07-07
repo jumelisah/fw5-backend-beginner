@@ -9,6 +9,7 @@ route.use('/profile', require('./profile'));
 route.use('/categories', require('./categories'));
 route.use('/locations', require('./locations'));
 route.use('/payment-status', require('./paymentStatus'));
+route.use('/report', require('./report'));
 
 route.get('/', (req, res)=>{
   return res.json({

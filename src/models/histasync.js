@@ -83,3 +83,10 @@ exports.deleteHistoryAdmin = (id)=>new Promise((resolve, reject)=>{
     resolve(res);
   });
 });
+
+exports.getHistoryStatus = (status) => new Promise((resolve, reject) => {
+  db.query('SELECT h.id AS id, v.name AS name, v.image AS image, v.location AS location, v.year AS year FROM histories h JOIN vehicles v ON h.vehicle_id=v.id WHERE status=?', [status], (err, res) => {
+    if(err) reject(err);
+    resolve(res);
+  });
+});
