@@ -44,7 +44,7 @@ exports.getVehicles = async(req, res)=>{
       return response(res, 'Data not found', null, 404);
     }
   } catch(err) {
-    return response(res, Array.isArray(err) ? String(err) : err, null, 500);
+    return response(res, String(err), null, 500);
   }
 };
 
