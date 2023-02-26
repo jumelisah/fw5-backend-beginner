@@ -43,7 +43,6 @@ const changeDate = (date, y)=>{
   let c = expired.getHours();
   let d = expired.getMinutes();
   let e = expired.getSeconds();
-  console.log(e.length);
   let dates = [expired.getFullYear(), a,b,c,d,e];
   for(let i =1; i<dates.length;i++){
     if(parseInt(dates[i])<10){

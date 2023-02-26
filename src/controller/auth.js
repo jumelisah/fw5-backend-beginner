@@ -84,12 +84,9 @@ exports.forgotPassword = async(req, res)=>{
             try{
               const salt = await bcrypt.genSalt(10);
               const hash = await bcrypt.hash(password, salt);
-              console.log('satu', hash);
               const changeResult = await userAuth.updatePassword(hash, checkCode[idx].user_id);
-              console.log('dua', changeResult);
               if(changeResult.affectedRows>0){
                 const changeStat = await userAuth.updateReqCode(checkCode[idx].id);
-                console.log('tiga', changeStat);
                 if(changeStat.affectedRows>0){
                   return response(res, 'Password was changed', null);
                 }else{

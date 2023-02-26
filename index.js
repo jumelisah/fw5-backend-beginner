@@ -3,10 +3,10 @@ const cors = require('cors');
 require('dotenv').config();
 const app = express();
 const options = {
-  "origin": "*",
-  "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-  "preflightContinue": false,
-  "optionsSuccessStatus": 204
+  'origin': '*',
+  'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  'preflightContinue': false,
+  'optionsSuccessStatus': 204
 };
 
 app.use(express.urlencoded({extended : true}));

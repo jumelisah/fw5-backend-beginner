@@ -72,8 +72,7 @@ exports.getUserHistories = async(req, res)=>{
       return response(res, 'History not found', null, 404);
     }
   } catch (e) {
-    console.log(e);
-    return response(res, 'Unexpected error',null, 500);
+    return response(res, String(e),null, 500);
   }
 };
 
@@ -165,9 +164,6 @@ exports.editHistoryStatus = async (req, res) => {
     if (getResult.length < 1) {
       return response(res, 'History not found');
     }
-    console.log(getResult);
-    console.log(getResult[0].user_id, typeof(getResult[0].user_id));
-    console.log(req.user.id, typeof(req.user.id));
     if (getResult[0].user_id != req.user.id && req.user.role !== 'admin') {
       return response (res, 'Unauthorized', null, 403);
     }

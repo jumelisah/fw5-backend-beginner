@@ -55,7 +55,6 @@ exports.getUser = async(req, res)=>{
 exports.createUser = async(req, res)=>{
   const {username, email, password: rawPassword, confirmPassword} = req.body;
   const image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648876041/SERAN/uploads/users/default-user_cyzz1x.png';
-  console.log(req.body.confirmPassword);
   try{
     const salt = await bcrypt.genSalt(10);
     const password = await bcrypt.hash(rawPassword, salt);
@@ -117,10 +116,10 @@ exports.createUser = async(req, res)=>{
       return response(res, 'Unexpected error: Can\'t send confirmation code', null);
     }
   }catch(err){
-    if(req.files.length > 0){
+    if(req.files?.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
-    return response(res, 'Input the password!', null, 400);
+    return response(res, String(err), null, 400);
   }
 };
 
@@ -224,7 +223,6 @@ exports.updateUser = async(req, res)=>{
           }
         }
         const resultUpdate = await usersProfile.updateUser(data, id);
-        console.log(resultUpdate);
         if(resultUpdate.affectedRows>0){
           const resultUpdateUser = await usersProfile.getUser(id);
           if(resultUpdateUser.length===1){

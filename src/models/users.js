@@ -43,7 +43,7 @@ exports.getPhone = (phone_number)=>new Promise((resolve, reject)=>{
 });
 
 exports.createUser = (data)=> new Promise((resolve, reject)=>{
-  db.query(`INSERT INTO users (name, username, email, password, image) VALUES ('${data.name}', '${data.username}', '${data.email}', '${data.password}', '${data.image}')`,(err, res)=>{
+  db.query(`INSERT INTO users (name, username, email, password, image, role) VALUES ('${data.name}', '${data.username}', '${data.email}', '${data.password}', '${data.image}', 'user')`,(err, res)=>{
     if(err) reject(err);
     resolve(res);
   });

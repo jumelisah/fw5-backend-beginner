@@ -31,21 +31,16 @@ const getProfile = async (req, res)=>{
 const editProfile = async (req, res) => {
   try {
     const {id} = req.user;
-    console.log(id);
-    // const {name, username, email, role, phone_number, gender, birthdate, address} = req.body;
     let image ='';
-    console.log(req.files);
     if (req.files.length > 0) {
       image = req.files[0].path;
     }
-    console.log(req.files);
     const dataName = ['name', 'username', 'email', 'password', 'role', 'phone_number', 'gender', 'birthdate', 'address'];
     const resultId = await usersProfile.getUser(id);
     const data = {image};
     if (data.image === '') {
       data.image = resultId[0].image;
     }
-    console.log(req.body.name);
     dataName.forEach(x=>{
       if(req.body[x] && req.body[x]!==''){
         data[x] = req.body[x];
@@ -93,9 +88,7 @@ const editProfile = async (req, res) => {
       }
     }
     if(req.body.birthdate){
-      console.log(req.body.birthdate);
       const itsDate = isDate(req.body.birthdate);
-      console.log(itsDate);
       if(itsDate!=='Invalid Date'){
         data.birthdate = itsDate;
       }else{
@@ -106,7 +99,6 @@ const editProfile = async (req, res) => {
       }
     }
     const resultUpdate = await usersProfile.updateUser(data, id);
-    console.log(resultUpdate);
     if(resultUpdate.affectedRows>0){
       const resultUpdateUser = await usersProfile.getUser(id);
       if(resultUpdateUser.length===1){

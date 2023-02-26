@@ -107,46 +107,36 @@ exports.getPopularVehicle = async(req, res)=>{
 
 exports.addVehicle = async (req, res)=>{
   try {
-    console.log(req.user.role);
     if(req.user.role=='admin'){
       const {name, year, cost, qty, type, seat, category_id, location} = req.body;
       let image = 'https://res.cloudinary.com/juumelisa/image/upload/v1648980071/SERAN/uploads/vehicles/Untitled_design_4_pus3lj.png';
       const data = {name, image, year, cost, qty, type, seat, category_id, location};
-      console.log(data, '1');
-      console.log(req.files);
-      if(req.files.length > 0){
+      if(req.files?.length > 0){
         image = req.files[0].path;
       }
-      console.log(image);
       data.image = image;
-      console.log(data.image);
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
       const dataName = ['name', 'year', 'cost', 'qty', 'seat', 'category_id', 'location'];
       const itsNull = isNull(data, dataName);
       const checkType = checkDataType(data, dataNumber, dataString);
-      console.log(2);
       if(itsNull){
-        if(req.files.length > 0){
+        if(req.files?.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Please fill in all the fields.', null, 400);
       }
-      console.log(3);
       if(checkType.length>0){
         return response(res, checkType, null, 400);
       }
-      console.log(4);
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0){
-        if(req.files.length > 0){
+        if(req.files?.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Vehicle already on the list', null, 400);
       }
-      console.log(5);
       const addResult = await vehicleModel.addVehicle(data);
-      console.log(6);
       if(addResult.affectedRows>0){
         const resultId = await vehicleModel.getVehicle(addResult.insertId);
         if(resultId.length===1){
@@ -155,19 +145,19 @@ exports.addVehicle = async (req, res)=>{
           return response(res, 'Error: Can\'t get data', null, 500);
         }
       }else{
-        if(req.files.length > 0){
+        if(req.files?.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'Error: Can\'t add vehicle', null, 500);
       }
     }else{
-      if(req.files.length > 0){
+      if(req.files?.length > 0){
         deleteImage(cloudPath(req.files[0].filename));
       }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch (e) {
-    if(req.files.length > 0){
+    if(req.files?.length > 0){
       deleteImage(cloudPath(req.files[0].filename));
     }
     return response(res, 'Unexpected error', null, 500);
@@ -177,17 +167,13 @@ exports.addVehicle = async (req, res)=>{
 exports.updateVehicle = async(req, res)=>{
   try{
     const {id} = req.params;
-    console.log(id, 0);
-    console.log(req.user.role);
     if(req.user.role=='admin'){
       const data = {};
       let image ='';
-      console.log(req.files);
-      if(req.files.length>0){
+      if(req.files?.length>0){
         image = req.files[0].path;
         data.image = image;
       }
-      console.log(req.files);
       const dataName = ['name', 'year', 'cost', 'qty', 'type', 'seat', 'category_id', 'location', 'available'];
       const dataNumber = ['year', 'cost', 'qty', 'seat', 'category_id'];
       const dataString = ['name', 'location'];
@@ -195,19 +181,18 @@ exports.updateVehicle = async(req, res)=>{
         return response(res, 'Please input the ID first!', null, 400);
       }
       if(id<1){
-        if(req.files.length > 0){
+        if(req.files?.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, 'ID should be a number greater than 0', null, 400);
       }
       const checkType = checkDataType(data, dataNumber, dataString);
-      console.log(checkType);
       if(checkType.length>0){
         return response(res, checkType, null, 400);
       }
       const resultId = await vehicleModel.getVehicle(id);
       if(resultId.length<1){
-        if(req.files.length > 0){
+        if(req.files?.length > 0){
           deleteImage(cloudPath(req.files[0].filename));
         }
         return response(res, `Vehicle with ID=${id} not found`, null, 404);
@@ -222,7 +207,6 @@ exports.updateVehicle = async(req, res)=>{
           data.image = resultId[0].image;
         }
       });
-      console.log(data);
       const checkVehicle = await vehicleModel.getVehicleName(data);
       if(checkVehicle.length>0 && checkVehicle[0].id!==parseInt(id)){
         return response(res, 'Vehicle already on the list', null, 400);
@@ -235,13 +219,13 @@ exports.updateVehicle = async(req, res)=>{
         }
       }
     }else{
-      if(req.files.length > 0){
+      if(req.files?.length > 0){
         deleteImage(cloudPath(req.files[0].filename));
       }
       return response(res, 'You are unable to do this action', null, 403);
     }
   } catch {
-    if(req.files.length > 0){
+    if(req.files?.length > 0){
       deleteImage(cloudPath(req.files[0]?.filename));
     }
     return response(res, 'Unexpected Error', 400);
@@ -266,7 +250,6 @@ exports.deleteVehicle = async(req, res)=>{
         const deleteResult = await vehicleModel.deleteVehicle(id);
         if(deleteResult.affectedRows>0){
           const getData = await vehicleModel.getDeletedVehicle(id);
-          console.log(getData);
           return response(res, 'Successfully deleted vehicle', getData[0]);
         }
       }else{

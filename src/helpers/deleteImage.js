@@ -13,7 +13,6 @@ exports.cloudPath = (path) => path.split('/').slice(-4).join('/').split('.')
   .join('');
 
 exports.deleteImage = (publicId) => {
-  console.log(publicId);
   cloudinary.uploader.destroy(
     publicId,
     // (error, result) => ({ result, error }),
