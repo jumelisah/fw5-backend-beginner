@@ -11,6 +11,7 @@ const {isDate, changeDate} = require('../helpers/dateValidator');
 const { deleteImage, cloudPath} = require('../helpers/deleteImage');
 
 exports.getUsers = async(req, res)=>{
+  if(req.user.role !== 'admin') return response(res, 'Unauthorized', null, 403);
   let {name, page, limit} = req.query;
   name = name || '';
   page = parseInt(page) || 1;
